@@ -12,7 +12,13 @@ module.exports = ({ config }) => {
     },
     plugins: [
       ...(config.plugins || []),
-      ['expo-build-properties', { android: { usesCleartextTraffic: api.startsWith('http://') } }]
+      ['expo-build-properties', {
+        android: {
+          usesCleartextTraffic: api.startsWith('http://'),
+          // expo-modules-core (SDK 52) compila su parte de Compose con Kotlin 1.9.25
+          kotlinVersion: '1.9.25'
+        }
+      }]
     ],
     extra: { ...(config.extra || {}), apiUrl: api }
   };
