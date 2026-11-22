@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
-# Instala Biblioteca ITL en un servidor Ubuntu (probado para Oracle Cloud Always Free, Ampere A1).
+# Instala Biblioteca ITL en un servidor Ubuntu 22.04/24.04 (x64 o ARM): Azure for Students, Oracle Cloud, etc.
 #
-#   git clone https://github.com/<usuario>/<repositorio>.git biblioteca-itl
+#   git clone https://github.com/LeonardoRosas23/biblioteca-itl.git
 #   cd biblioteca-itl
-#   bash deploy/oracle/instalar.sh bibliotecaitl.duckdns.org
+#   bash deploy/instalar.sh <dominio>     # p. ej. bibliotecaitl.mexicocentral.cloudapp.azure.com
 #
 # Hace: instala Docker, abre los puertos 80 y 443 del firewall del servidor, crea un .env con
 # secretos al azar, levanta todo con HTTPS y carga los datos de demostración.
 # Se puede volver a correr: no cambia los secretos de un .env que ya existe.
 set -euo pipefail
-cd "$(dirname "$0")/../.."
+cd "$(dirname "$0")/.."
 
 DOMINIO="${1:-}"
 if [ -z "$DOMINIO" ]; then
-  echo "Uso: bash deploy/oracle/instalar.sh <tu-dominio>   (p. ej. bibliotecaitl.duckdns.org)" >&2
+  echo "Uso: bash deploy/instalar.sh <tu-dominio>   (p. ej. bibliotecaitl.mexicocentral.cloudapp.azure.com)" >&2
   exit 1
 fi
 paso() { printf '\n\033[1;34m== %s\033[0m\n' "$*"; }
@@ -33,13 +33,13 @@ fi
 free -h | head -2
 
 paso "3/6 Firewall del servidor: puertos 80 y 443"
-# Las imágenes de Ubuntu de Oracle traen reglas iptables que rechazan todo salvo SSH.
+# Las imágenes de Ubuntu de Oracle traen reglas iptables que rechazan todo salvo SSH; en Azure no hace daño.
 for puerto in 80 443; do
   sudo iptables -C INPUT -p tcp --dport "$puerto" -m conntrack --ctstate NEW -j ACCEPT 2>/dev/null \
     || sudo iptables -I INPUT 1 -p tcp --dport "$puerto" -m conntrack --ctstate NEW -j ACCEPT
 done
 if command -v netfilter-persistent >/dev/null; then sudo netfilter-persistent save >/dev/null; fi
-echo "Recuerda abrir también 80 y 443 en la Security List de la VCN (consola de Oracle)."
+echo "Los puertos 80 y 443 también deben estar abiertos en el proveedor (Azure: grupo de seguridad de red; Oracle: Security List)."
 
 paso "4/6 Configuración (.env)"
 if [ ! -f .env ]; then

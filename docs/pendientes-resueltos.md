@@ -11,7 +11,7 @@
 | 3 | Evidencia de `docker compose up` (RNF02) | ✅ / 👤 | Levanta limpio en GitHub Actions en cada push; falta la prueba en un segundo equipo del equipo |
 | 4 | Compilar adaptadores de Notificaciones | ✅ | `go mod tidy && go test -race ./...` |
 | 5 | Datos de prueba de préstamos, multas y avisos | ✅ | `scripts/cargar-datos-demo.sh` y `*/db/demo.sql` (probado dos veces seguidas en PostgreSQL) |
-| 6 | Versión final desplegada | 👤 | Oracle Cloud: `docs/despliegue.md` |
+| 6 | Versión final desplegada | 👤 | Azure for Students: `docs/despliegue.md` |
 
 ## Funcionalidad
 

@@ -1,69 +1,82 @@
-# Despliegue gratuito: Oracle Cloud + DuckDNS + APK de Android
+# Despliegue gratuito en Azure for Students + APK de Android
 
 Resultado final:
 
-- El sistema completo en línea las 24 horas en `https://<tu-dominio>.duckdns.org`, con certificado HTTPS real.
+- El sistema completo en línea en `https://<tu-nombre>.<región>.cloudapp.azure.com`, con certificado HTTPS real.
 - La app instalada en cualquier Android a partir de un APK que se descarga de la página de Releases de GitHub.
 
-Todo es gratuito. Necesitas: una cuenta de Oracle Cloud (pide tarjeta solo para verificar identidad), una cuenta de DuckDNS (entras con GitHub o Google) y el repositorio en GitHub.
+Necesitas tu correo institucional (@itleon.edu.mx) y la cuenta de GitHub del repositorio. No se necesita tarjeta.
 
-> **Límites de la capa gratuita de Oracle.** Desde el 15 de junio de 2026, las cuentas gratuitas tienen hasta **2 OCPU y 12 GB de RAM** en instancias Ampere A1 (antes eran 4 y 24). Alcanza de sobra para este sistema. No pidas más de eso: si te pasas del límite gratuito, Oracle apaga las instancias.
+## Costos: por qué no te pueden cobrar
 
-## Costos: por qué es gratis y cómo asegurarte de que no te cobren
+| Concepto | Detalle |
+|---|---|
+| **Crédito** | Azure for Students da **100 USD para usar en 12 meses, sin tarjeta**. Si se acaba el crédito, la suscripción **se desactiva**; solo pasaría a un plan de pago si tú lo pides a soporte |
+| **Servidor recomendado** | **B2ps v2** (2 núcleos ARM, 8 GB): unos 33 USD al mes encendido todo el tiempo. Alternativa: **B2s** o **B2ls v2** (2 núcleos x64, 4 GB): unos 30 USD al mes |
+| **Disco e IP pública** | Unos 6 USD al mes en total (disco *Standard SSD* de 30 GB e IP fija) |
+| **Cuánto alcanza** | Encendido 24/7, unos 2.5 meses. Si lo **detienes** cuando no se usa (botón *Stop*), el servidor deja de cobrar y el crédito dura mucho más |
+| **DuckDNS** | No hace falta: Azure da un dominio gratuito `*.cloudapp.azure.com` |
+| **GitHub Actions y Releases** | Gratis en repositorios públicos |
 
-| Servicio | Por qué no cuesta | Lo único que NO debes hacer |
-|---|---|---|
-| **Oracle Cloud** | Oracle no cobra la tarjeta a menos que actualices la cuenta. Si una cuenta gratuita pasa del límite, Oracle **apaga** las instancias Ampere en lugar de cobrarlas | **Nunca** presiones *Upgrade to Pay As You Go*. Crea **solo** una instancia A1 de 2 OCPU y 12 GB con el disco de 47 GB que viene por defecto. Durante los primeros 30 días de prueba la consola te deja crear cosas más grandes con el crédito de regalo; no lo hagas, porque al terminar la prueba se eliminan |
-| **GitHub Actions** | Gratis en repositorios **públicos** con los runners estándar (`ubuntu-latest`), que son los que usa este proyecto | No vuelvas privado el repositorio sin revisar el plan. No agregues un método de pago: sin él, si algo excediera la cuota, GitHub lo **bloquea** en lugar de cobrarlo |
-| **Releases de GitHub** (el APK) | Gratis | — |
-| **DuckDNS** y **Let's Encrypt** | Servicios gratuitos | — |
-| **APK de Android** | Se instala directo (sin Play Store, que sí cobra el registro de desarrollador) | — |
-
-Para revisar en cualquier momento que vas en $0:
-- **Oracle:** ☰ → *Billing & Cost Management* → *Cost Analysis*. También puedes crear un *Budget* de $1 USD con alerta por correo.
-- **GitHub:** tu foto → *Settings* → *Billing and licensing*.
+**Para ver cuánto crédito te queda:** portal de Azure → busca **Education** → *Overview*, o **Cost Management**.
 
 ---
 
-## 1. Crear la cuenta de Oracle Cloud
+## 1. Activar Azure for Students (≈ 10 min)
 
-1. Entra a **cloud.oracle.com/free** → *Start for free*.
-2. Llena tus datos y verifica la tarjeta. Oracle hace un cargo temporal de verificación que luego devuelve.
-3. **Región de inicio (home region):** elige *Mexico Central (Querétaro)* o *Mexico Northeast (Monterrey)*. **No se puede cambiar después.**
-4. Espera el correo de "Your account is ready" y entra a la consola.
-5. Si en algún momento la consola te ofrece **Upgrade** o **Pay As You Go**, ignóralo: la cuenta gratuita es todo lo que necesitas.
+1. Entra a **azure.microsoft.com/free/students** → **Start free**.
+2. Inicia sesión con tu correo **@itleon.edu.mx**. Si el Tecnológico usa Microsoft 365, es la misma contraseña de tu correo institucional.
+3. Completa la verificación de estudiante y tu teléfono. **No pide tarjeta.**
+4. Al terminar entras al **portal de Azure** (portal.azure.com) con una suscripción llamada **Azure for Students**.
 
-## 2. Crear el servidor (instancia)
+## 2. Ver en qué regiones te deja crear servidores
 
-1. Menú ☰ → **Compute → Instances → Create instance**.
-2. **Name:** `biblioteca-itl`.
-3. **Image and shape → Edit:**
-   - *Image:* **Canonical Ubuntu 24.04**.
-   - *Shape:* **Ampere → VM.Standard.A1.Flex**, con **2 OCPU y 12 GB** de memoria.
-4. **Networking:**
-   - Deja *Create new virtual cloud network* y *Create new public subnet*.
-   - Confirma que **Assign a public IPv4 address** esté activado.
-5. **Add SSH keys:** *Generate a key pair for me* → **Save private key**. Guárdala en `C:\Users\<tú>\.ssh\oracle-biblioteca.key`.
-6. **Create.** En uno o dos minutos queda en verde (*Running*). Copia la **Public IP address**.
+Las cuentas de estudiante solo pueden crear recursos en unas **5 regiones**, y **la lista cambia de una persona a otra**. Revísala antes de crear el servidor:
 
-> Si aparece **"Out of capacity"**, no hay servidores Ampere libres en ese momento. Vuelve a intentarlo más tarde, o cambia de *Availability domain* en el mismo formulario. No uses la forma *E2.1.Micro*: con 1 GB no alcanza para este sistema.
+1. En el buscador de arriba del portal escribe **Policy** → ábrelo.
+2. Menú izquierdo → **Assignments** → abre **Allowed resource deployment regions**.
+3. En **Parameters** verás la lista de regiones permitidas. Elige la más cercana. En orden de preferencia: *Mexico Central*, *South Central US*, *West US 2/3*, *East US*, *Central US*.
 
-## 3. Abrir los puertos 80 y 443 en Oracle
+Si la lista sale vacía o todas las regiones fallan, abre una solicitud gratuita en **Help + support** pidiendo que habiliten una región para tu suscripción de estudiante.
 
-1. En la página de la instancia → **Primary VNIC → Subnet** (el enlace) → **Security Lists** → *Default Security List…*
-2. **Add Ingress Rules**, dos veces:
-   - Source CIDR `0.0.0.0/0`, IP Protocol **TCP**, Destination port **80**.
-   - Source CIDR `0.0.0.0/0`, IP Protocol **TCP**, Destination port **443**.
+## 3. Crear el servidor (≈ 10 min)
 
-El firewall interno del servidor lo abre el script de instalación.
+Portal → **Virtual machines** → **Create** → **Azure virtual machine**.
 
-## 4. Crear tu dominio gratuito en DuckDNS
+**Pestaña Basics:**
 
-1. Entra a **duckdns.org** e inicia sesión con GitHub o Google.
-2. En *sub domain* escribe un nombre (por ejemplo `bibliotecaitl`) → **add domain**.
-3. En el campo **current ip** de ese dominio pega la IP pública de tu instancia → **update ip**.
+| Campo | Valor |
+|---|---|
+| Subscription | Azure for Students |
+| Resource group | **Create new** → `biblioteca-itl` |
+| Virtual machine name | `biblioteca-itl` |
+| Region | Una de la lista del paso 2 |
+| Availability options | *No infrastructure redundancy required* |
+| Security type | *Standard* |
+| Image | **Ubuntu Server 24.04 LTS** |
+| VM architecture | **Arm64** para el B2ps v2, o **x64** para el B2s / B2ls v2 |
+| Size | **See all sizes** → busca `B2ps_v2`. Si no está disponible: x64 con `B2s` o `B2ls_v2` |
+| Authentication type | **SSH public key** |
+| Username | `azureuser` |
+| SSH public key source | **Generate new key pair** · Key pair name `biblioteca-itl` |
+| Public inbound ports | **Allow selected ports** → marca **SSH (22)**, **HTTP (80)** y **HTTPS (443)** |
 
-Tu dirección será `https://bibliotecaitl.duckdns.org`.
+**Pestaña Disks:** *OS disk type* → **Standard SSD**, que es más barato que Premium. Deja marcado *Delete with VM*.
+
+**Pestaña Management (opcional, para ahorrar crédito):** *Auto-shutdown* → **Enable**, a las 23:30, zona *(UTC-06:00) Guadalajara, Mexico City*. El servidor se apaga cada noche y lo enciendes con **Start** cuando lo necesites.
+
+**Review + create** → **Create** → **Download private key and create resource**.
+
+Guarda el archivo `biblioteca-itl.pem` en `C:\Users\TU-USUARIO\.ssh\`.
+
+> Si al crear aparece **RequestDisallowedByAzure**, la región elegida no está permitida: vuelve al paso 2 y usa otra.
+
+## 4. Ponerle nombre al servidor (≈ 2 min)
+
+1. Cuando termine, **Go to resource**.
+2. En *Overview*, junto a **DNS name**, haz clic en **Not configured** (o *Configure*).
+3. En **DNS name label** escribe un nombre, por ejemplo `bibliotecaitl` → **Save**.
+4. Tu dirección queda como `bibliotecaitl.<región>.cloudapp.azure.com`, por ejemplo `bibliotecaitl.mexicocentral.cloudapp.azure.com`. Cópiala completa: es **TU-DOMINIO** en los pasos siguientes.
 
 ## 5. Entrar al servidor desde Windows
 
@@ -71,67 +84,63 @@ En PowerShell:
 
 ```powershell
 # Solo la primera vez: Windows exige que la llave sea privada
-icacls "$env:USERPROFILE\.ssh\oracle-biblioteca.key" /inheritance:r /grant:r "$($env:USERNAME):(R)"
+icacls "$env:USERPROFILE\.ssh\biblioteca-itl.pem" /inheritance:r /grant:r "$($env:USERNAME):(R)"
 
-ssh -i "$env:USERPROFILE\.ssh\oracle-biblioteca.key" ubuntu@<IP-PÚBLICA>
+ssh -i "$env:USERPROFILE\.ssh\biblioteca-itl.pem" azureuser@TU-DOMINIO
 ```
 
-Responde `yes` la primera vez. Ya estás dentro del servidor.
+Responde `yes` la primera vez.
 
-## 6. Instalar el sistema (dentro del servidor)
+## 6. Instalar el sistema (dentro del servidor, ≈ 15–20 min)
 
 ```bash
-git clone https://github.com/<tu-usuario>/<tu-repositorio>.git biblioteca-itl
+git clone https://github.com/LeonardoRosas23/biblioteca-itl.git
 cd biblioteca-itl
-bash deploy/oracle/instalar.sh bibliotecaitl.duckdns.org
+bash deploy/instalar.sh TU-DOMINIO
 ```
 
 El script hace lo siguiente:
 
-1. Instala Docker.
-2. Abre los puertos 80 y 443 en el firewall del servidor.
-3. Crea un `.env` con contraseñas al azar.
-4. Construye y levanta los 11 contenedores (los 10 del sistema más Caddy, que pone el HTTPS). La primera vez tarda unos 10 a 15 minutos.
-5. Carga los datos de demostración.
+1. Instala Docker y agrega 2 GB de memoria de intercambio.
+2. Crea un `.env` con contraseñas al azar.
+3. Construye y levanta los 11 contenedores, con Caddy para el HTTPS.
+4. Carga los datos de demostración.
 
-Al final muestra la **contraseña de las cuentas de prueba**. También queda en `~/credenciales-biblioteca.txt`; para verla después: `cat ~/credenciales-biblioteca.txt`.
+Termina con **"Listo."** y muestra la **contraseña de las cuentas de prueba**. También queda en `~/credenciales-biblioteca.txt`; para verla después: `cat ~/credenciales-biblioteca.txt`.
 
-Abre `https://bibliotecaitl.duckdns.org` en tu navegador: debe cargar el panel con el candado de HTTPS.
+Abre `https://TU-DOMINIO` en tu navegador: debe cargar el panel con el candado de HTTPS. La primera vez, el certificado puede tardar 1 o 2 minutos.
 
-**Comandos útiles en el servidor:**
+## 7. Generar e instalar la app en tu Android
 
-```bash
-cd ~/biblioteca-itl
-bash deploy/oracle/actualizar.sh                       # traer cambios de GitHub y reconstruir
-sudo docker compose -f docker-compose.yml -f docker-compose.prod.yml ps        # estado
-sudo docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f prestamos   # registros
-```
+1. En GitHub → repositorio → **Actions** → **APK Android** → **Run workflow**.
+2. En *api_url* escribe `https://TU-DOMINIO`, sin barra al final → **Run workflow**. Espera la palomita verde, unos 6 a 10 minutos.
+3. **En el teléfono**, abre en Chrome **github.com/LeonardoRosas23/biblioteca-itl/releases** → **App Android** → toca `biblioteca-itl.apk`.
+4. Abre la descarga → **Instalar**.
+   - Si no se permite: **Configuración → Instalar apps desconocidas → Chrome → Permitir**.
+   - Si Play Protect advierte: **Más detalles → Instalar de todas formas**.
 
-## 7. Generar e instalar la app en tu Android (Galaxy S23)
+Si algún día cambia la dirección del servidor, vuelve a correr **APK Android** con la nueva e instala el APK encima del anterior.
 
-1. En GitHub, en tu repositorio → pestaña **Actions** → **APK Android** (a la izquierda) → **Run workflow**.
-2. En *api_url* escribe `https://bibliotecaitl.duckdns.org` → **Run workflow**. Tarda unos 15 a 25 minutos.
-3. Cuando termine, ve a la página **Releases** del repositorio (columna derecha de la portada) → **App Android** → `biblioteca-itl.apk`.
-4. **En el S23**, abre esa página de Releases en Chrome, toca `biblioteca-itl.apk` y descárgalo.
-5. Toca la notificación de descarga → **Instalar**. La primera vez Android pide permiso:
-   - *Configuración → Permitir desde esta fuente* (Chrome) → regresa e instala.
-   - Si Play Protect advierte que la app es desconocida → **Más detalles → Instalar de todas formas**. Es normal en apps que no vienen de Play Store.
-6. Abre **Biblioteca ITL**, regístrate o entra con una cuenta de prueba.
+## 8. Uso diario
 
-Cada vez que cambie la app, vuelve a correr el flujo **APK Android** e instala el nuevo APK encima del anterior (conserva la sesión).
+| Acción | Cómo |
+|---|---|
+| **Apagar** para ahorrar crédito | Portal → la VM → **Stop**. Detenida, la VM no se cobra; solo el disco y la IP, unos centavos al día |
+| **Encender** | Portal → la VM → **Start**. A los 2 o 3 minutos el sistema arranca solo, con los datos intactos |
+| **Actualizar** tras cambios en GitHub | `ssh …` → `cd biblioteca-itl && bash deploy/actualizar.sh` |
+| **Ver registros** | `sudo docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f prestamos` |
+| **Ver el crédito** | Portal → **Education** o **Cost Management** |
 
-## 8. Pruebas automáticas en GitHub
+**Antes de cada presentación:** enciende la VM unos 10 minutos antes y abre `https://TU-DOMINIO` para confirmar que responde.
 
-Cada `push` a `main` corre el flujo **Pruebas** (pestaña *Actions*):
+## Si algo falla
 
-- Las pruebas de los seis componentes: Jest, pytest con PostgreSQL, `mvn test`, `go test -race`, Vitest y Jest de la app.
-- El sistema completo con Docker: integración front–back del panel y de la app, la prueba de punta a punta PI01–PI19 y la prueba de carga RNF05.
-
-En cada ejecución, la sección *Artifacts* tiene los reportes de JUnit y JaCoCo de Préstamos y el reporte `e2e_gateway.txt`. Descárgalos como evidencia de las entregas.
-
-## Seguridad del servidor público
-
-- El `.env` del servidor nunca se sube a GitHub (está en `.gitignore`), y todas sus contraseñas son aleatorias.
-- Las cuentas de prueba usan la contraseña aleatoria de `SEED_PASSWORD`, no la de desarrollo. Compártela solo con el equipo y el profesor.
-- Las bases de datos no se exponen a Internet; solo Caddy escucha en 80 y 443.
-- Si quieres desactivar el registro abierto de alumnos, pon `DOMINIO_CORREO=itleon.edu.mx` (ya viene así): solo se aceptan correos institucionales.
+| Problema | Solución |
+|---|---|
+| `RequestDisallowedByAzure` | Región no permitida: paso 2 |
+| El tamaño B2ps v2 no aparece | Cambia *VM architecture* a x64 y usa B2s o B2ls v2 |
+| `Permission denied (publickey)` | El usuario es `azureuser`; revisa la ruta del `.pem` y el comando `icacls` |
+| La página no abre | En la VM → **Networking** → confirma reglas de entrada para 80 y 443 |
+| Error de certificado | Espera 2 minutos o revisa con `sudo docker compose -f docker-compose.yml -f docker-compose.prod.yml logs caddy` |
+| La app no conecta | El APK debe haberse generado con tu dirección exacta, con `https://` |
+| El servidor se quedó sin memoria (x64 de 4 GB) | `sudo docker compose -f docker-compose.yml -f docker-compose.prod.yml restart prestamos`. Si se repite, avísame para limitar la memoria de Java |

@@ -76,7 +76,7 @@ cd movil && E2E=1 EXPO_PUBLIC_API_URL=http://localhost:8080 npx jest __tests__/i
 
 - **Pruebas en GitHub Actions** (`.github/workflows/pruebas.yml`): en cada push a `main` corren las pruebas de los seis componentes (incluidos `mvn test` y `go test -race`) y el sistema completo con Docker: integración front–back, PI01–PI19 y la prueba de carga. Los reportes quedan como *Artifacts* de cada ejecución.
 - **APK de Android** (`.github/workflows/apk.yml`): Actions → *APK Android* → *Run workflow* con la dirección del servidor. El APK queda en la página de Releases.
-- **Servidor gratuito 24/7** en Oracle Cloud con HTTPS (Caddy + DuckDNS): guía completa en [`docs/despliegue.md`](docs/despliegue.md).
+- **Servidor en la nube con HTTPS** (Caddy + Let's Encrypt) en Azure for Students, sin tarjeta: guía en [`docs/despliegue.md`](docs/despliegue.md). Alternativa con Oracle Cloud: [`docs/despliegue-oracle.md`](docs/despliegue-oracle.md). El script `deploy/instalar.sh` sirve para cualquier servidor Ubuntu.
 
 Todo esto ya corrió y pasa en GitHub Actions. Lo único que se hace a mano: las capturas de la app móvil ([`docs/capturas/LEEME.md`](docs/capturas/LEEME.md)) y la prueba de arranque en un segundo equipo (RNF02).
 
