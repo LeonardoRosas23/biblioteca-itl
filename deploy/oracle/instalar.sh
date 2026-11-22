@@ -68,9 +68,12 @@ DC="sudo docker compose -f docker-compose.yml -f docker-compose.prod.yml"
 
 paso "5/6 Construir y levantar (la primera vez tarda varios minutos)"
 $DC up -d --build
-for i in $(seq 1 90); do
-  codigo=$($DC exec -T gateway wget -q -O /dev/null -S http://prestamos:8080/actuator/health 2>&1 | awk '/HTTP\//{print $2}' | tail -1 || true)
-  [ "$codigo" = "200" ] && break
+echo "Esperando a que Préstamos termine de arrancar…"
+for i in $(seq 1 100); do
+  if $DC exec -T gateway wget -q -O /dev/null http://prestamos:8080/actuator/health 2>/dev/null; then
+    echo "Préstamos listo."
+    break
+  fi
   sleep 3
 done
 

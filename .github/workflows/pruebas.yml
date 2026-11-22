@@ -98,6 +98,29 @@ jobs:
       - run: npm ci --legacy-peer-deps
       - run: npx jest --coverage
 
+  arm:
+    name: Construcción en ARM (como el servidor de Oracle)
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+      - name: Construir las imágenes de producción para arm64
+        run: |
+          cp .env.example .env
+          echo "DOMINIO=ejemplo.duckdns.org" >> .env
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml config -q
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml build
+      - name: Arrancar y comprobar que los servicios responden
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+          for i in $(seq 1 100); do
+            docker compose exec -T gateway wget -q -O /dev/null http://prestamos:8080/actuator/health 2>/dev/null && break
+            sleep 3
+          done
+          for ruta in /health /api/v1/categorias /api/v1/usuarios/me /api/v1/prestamos /api/v1/notificaciones; do
+            docker compose exec -T gateway wget -q -S -O /dev/null "http://localhost$ruta" 2>&1 | grep -m1 HTTP/ | sed "s|^|$ruta → |" || true
+          done
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml ps
+
   e2e:
     name: Sistema completo con Docker (PI01–PI19)
     runs-on: ubuntu-latest
