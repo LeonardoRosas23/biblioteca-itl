@@ -109,7 +109,7 @@ class CorreccionesNoviembreTest extends BasePrueba {
         reloj.avanzar(Duration.ofMinutes(2));
         eventoSvc.procesarPendientes();
         InOrder orden = inOrder(catalogo);
-        orden.verify(catalogo).entregar("R001", p.getIdPrestamo());
+        orden.verify(catalogo, times(2)).entregar("R001", p.getIdPrestamo());   // el intento fallido y el bueno
         orden.verify(catalogo).devolver("R001", p.getIdPrestamo(), false);
         assertThat(eventos.findAll()).filteredOn(EventoPendiente::esDeCatalogo)
                 .allMatch(ev -> ev.getEstado() == EventoPendiente.Estado.ENVIADO);
