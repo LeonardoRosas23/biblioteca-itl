@@ -6,6 +6,7 @@ import java.net.http.HttpClient;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CancellationException;
 import java.util.function.Supplier;
 import mx.edu.itl.biblioteca.prestamos.comun.Correlacion;
 import mx.edu.itl.biblioteca.prestamos.integracion.Clientes.*;
@@ -17,6 +18,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
@@ -71,6 +73,10 @@ public class HttpClientes {
                 }
                 ultima = e;
             } catch (ResourceAccessException e) {
+                ultima = e;
+            } catch (RestClientException | CancellationException e) {
+                // Spring 6.2.1 (JdkClientHttpRequest) lanza CancellationException cuando el servicio remoto
+                // no contesta dentro del tiempo límite (p. ej. el contenedor está detenido): también es "no disponible".
                 ultima = e;
             }
             dormir(100L * (intento + 1));
