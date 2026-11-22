@@ -28,6 +28,8 @@ from pathlib import Path
 import httpx
 
 RAIZ = Path(__file__).resolve().parent.parent
+# "Hoy" en la zona de la biblioteca, calculado por PostgreSQL: no depende de la zona del equipo que corre la prueba
+HOY_BIBLIOTECA = "(now() AT TIME ZONE 'America/Mexico_City')::date"
 PASS = "Biblio2026!"
 CORRIDA = uuid.uuid4().hex[:5]
 resultados = []
@@ -101,7 +103,8 @@ class Sistema:
         return a.json()
 
     def avisos(self, t):
-        return self.pedir("GET", "/api/v1/notificaciones", t, params={"tamano": 100}).json().get("items", [])
+        r = self.pedir("GET", "/api/v1/notificaciones", t, params={"tamano": 100})
+        return r.json().get("items", []) if r.status_code == 200 else []
 
     # ---------- infraestructura ----------
     def compose(self, *args, check=True):
@@ -126,7 +129,6 @@ def main():
     ap.add_argument("--compose", default="docker compose -f docker-compose.yml -f docker-compose.e2e.yml")
     a = ap.parse_args()
     s = Sistema(a.url, a.compose)
-    hoy = dt.date.today()
 
     # ================= CU08 · autenticación =================
     r = s.login("biblioteca@itleon.edu.mx")
@@ -239,7 +241,7 @@ def main():
 
     t_u4, _, _ = s.usuario_nuevo()
     act = s.prestamo_activo(t_u4, t_bib, s.recurso_nuevo(t_bib))
-    s.sql_prestamos(f"UPDATE prestamo SET fecha_devolucion_estimada = DATE '{hoy - dt.timedelta(days=3)}' "
+    s.sql_prestamos(f"UPDATE prestamo SET fecha_devolucion_estimada = {HOY_BIBLIOTECA} - 3 "
                     f"WHERE id_prestamo = '{act['idPrestamo']}'")
     d = s.pedir("POST", f"/api/v1/prestamos/{act['idPrestamo']}/devolucion", t_bib).json()
     multa = d.get("multa") or {}
@@ -277,7 +279,7 @@ def main():
     # ================= CU09 · planificador =================
     t_u8, _, _ = s.usuario_nuevo()
     act_venc = s.prestamo_activo(t_u8, t_bib, s.recurso_nuevo(t_bib))
-    s.sql_prestamos(f"UPDATE prestamo SET fecha_devolucion_estimada = DATE '{hoy - dt.timedelta(days=1)}' "
+    s.sql_prestamos(f"UPDATE prestamo SET fecha_devolucion_estimada = {HOY_BIBLIOTECA} - 1 "
                     f"WHERE id_prestamo = '{act_venc['idPrestamo']}'")
     vencido = esperar(lambda: s.pedir("GET", f"/api/v1/prestamos/{act_venc['idPrestamo']}", t_u8).json()["estado"] == "VENCIDO", 40, 2)
     recordatorio = esperar(lambda: any(n["tipo"] == "RECORDATORIO" and n["idPrestamo"] == "P-0002"
