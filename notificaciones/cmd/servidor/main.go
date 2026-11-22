@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 	"strconv"
+	"syscall"
 	"time"
 
 	"github.com/itl/biblioteca/notificaciones/internal/almacen/postgres"
@@ -22,7 +23,8 @@ func env(clave, defecto string) string {
 }
 
 func main() {
-	ctx, cancelar := signal.NotifyContext(context.Background(), os.Interrupt)
+	// SIGTERM es la señal que manda Docker al detener el contenedor (docker compose stop)
+	ctx, cancelar := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancelar()
 
 	almacen, err := postgres.Conectar(ctx,

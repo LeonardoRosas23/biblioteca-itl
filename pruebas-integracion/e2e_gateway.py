@@ -115,8 +115,11 @@ class Sistema:
                          "-tAc", sentencia)
         return r.stdout.strip()
 
-    def detener(self, servicio):
-        self.compose("stop", servicio)
+    def detener(self, servicio, ruta_salud):
+        """Detiene el contenedor y espera a que el gateway confirme que ya no responde (502)."""
+        self.compose("stop", "-t", "5", servicio)
+        if not esperar(lambda: self.http.get(ruta_salud).status_code >= 500, 30, 1):
+            raise RuntimeError(f"{servicio} sigue respondiendo después de detenerlo")
 
     def arrancar(self, servicio, ruta_salud):
         self.compose("start", servicio)
@@ -127,8 +130,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--url", default="http://localhost:8080")
     ap.add_argument("--compose", default="docker compose -f docker-compose.yml -f docker-compose.e2e.yml")
-    a = ap.parse_args()
-    s = Sistema(a.url, a.compose)
+    args = ap.parse_args()
+    s = Sistema(args.url, args.compose)
 
     # ================= CU08 · autenticación =================
     r = s.login("biblioteca@itleon.edu.mx")
@@ -291,7 +294,7 @@ def main():
 
     # ================= RNF04 · Notificaciones caído =================
     t_u9, _, _ = s.usuario_nuevo()
-    s.detener("notificaciones")
+    s.detener("notificaciones", "/api/v1/notificaciones")
     p18 = s.solicitar(t_u9, s.recurso_nuevo(t_bib))
     pendiente = s.sql_prestamos(f"SELECT estado FROM evento_pendiente WHERE clave_idempotencia = "
                                 f"'CONFIRMACION:{p18.json().get('idPrestamo')}'")
@@ -303,10 +306,10 @@ def main():
     # ================= PI19 · Usuarios o Catálogo caídos =================
     t_u10, id_u10, _ = s.usuario_nuevo()
     rid19 = s.recurso_nuevo(t_bib)
-    s.detener("catalogo")
+    s.detener("catalogo", "/api/v1/categorias")
     r_cat = s.solicitar(t_u10, rid19)
     s.arrancar("catalogo", "/api/v1/categorias")
-    s.detener("usuarios")
+    s.detener("usuarios", "/api/v1/usuarios/me")
     r_usr = s.solicitar(t_u10, rid19)
     s.arrancar("usuarios", "/api/v1/usuarios/me")
     sin_prestamo = s.sql_prestamos(f"SELECT count(*) FROM prestamo WHERE id_usuario = '{id_u10}'") == "0"
@@ -327,14 +330,14 @@ def main():
     caso("D8", "El X-Correlation-Id se propaga y vuelve en el error",
          r.json().get("correlacionId") == f"e2e-{CORRIDA}" and r.headers.get("X-Correlation-Id") == f"e2e-{CORRIDA}", r.text)
     try:
-        https = httpx.get(a.url.replace("http://", "https://").replace(":8080", ":8443") + "/health", verify=False, timeout=5)
+        https = httpx.get(args.url.replace("http://", "https://").replace(":8080", ":8443") + "/health", verify=False, timeout=5)
         caso("RNF06", "El gateway responde por HTTPS (puerto 8443)", https.status_code == 200, https.status_code)
     except httpx.HTTPError as e:
         caso("RNF06", "El gateway responde por HTTPS (puerto 8443)", False, e)
 
     # ================= reporte =================
     ok = sum(1 for r in resultados if r[2])
-    lineas = [f"Prueba de punta a punta por el gateway ({a.url}) · {dt.datetime.now():%d/%m/%Y %H:%M}", ""]
+    lineas = [f"Prueba de punta a punta por el gateway ({args.url}) · {dt.datetime.now():%d/%m/%Y %H:%M}", ""]
     lineas += [f"{'OK  ' if r[2] else 'FALLA'} {r[0]:<8} {r[1]:<95} {'' if r[2] else r[3]}" for r in resultados]
     lineas += ["", f"{ok} de {len(resultados)} casos correctos"]
     (RAIZ / "docs" / "evidencia").mkdir(parents=True, exist_ok=True)
