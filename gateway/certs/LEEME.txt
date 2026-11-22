@@ -1,0 +1,2 @@
+# Coloca aquí servidor.crt y servidor.key para usar un certificado real.
+# Si esta carpeta está vacía, el gateway genera uno autofirmado al arrancar.

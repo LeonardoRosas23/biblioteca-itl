@@ -1,0 +1,113 @@
+# Sistema de Gestión de Préstamo de Recursos Bibliotecarios · ITL
+# Arranque completo:   cp .env.example .env   &&   docker compose up --build
+# Panel web:           http://localhost:8080  ·  https://localhost:8443 (certificado autofirmado)
+# API:                 http://localhost:8080/api/v1/...
+#
+# Cada microservicio tiene su propia base de datos y su propio usuario (RNF03):
+# ningún servicio recibe credenciales de la base de otro.
+
+name: biblioteca-itl
+
+x-postgres: &postgres
+  image: postgres:16-alpine
+  restart: unless-stopped
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready -h localhost -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+    interval: 5s
+    retries: 10
+
+services:
+  gateway:
+    build: ./gateway
+    restart: unless-stopped
+    ports: ["8080:80", "8443:443"]                   # HTTP para desarrollo · HTTPS (RNF06)
+    environment:
+      HOST_PUBLICO: ${HOST_PUBLICO:-}                # IP o dominio para el certificado autofirmado
+    volumes: ["./gateway/certs:/etc/nginx/certs"]    # certificado real aquí; si no hay, se genera uno
+    depends_on: [usuarios, catalogo, prestamos, notificaciones, web]
+
+  web:
+    build: ./web
+    restart: unless-stopped
+
+  usuarios:
+    build: ./usuarios
+    restart: unless-stopped
+    environment:
+      DB_URL: postgres://usuarios_app:${PASS_USUARIOS}@db-usuarios:5432/bd_usuarios
+      JWT_SECRET: ${JWT_SECRET}
+      SERVICE_TOKEN: ${SERVICE_TOKEN}
+      DOMINIO_CORREO: ${DOMINIO_CORREO}
+      SEED_PASSWORD: ${SEED_PASSWORD:-Biblio2026!}   # contraseña de las cuentas de prueba
+    depends_on: { db-usuarios: { condition: service_healthy } }
+
+  catalogo:
+    build: ./catalogo
+    restart: unless-stopped
+    environment:
+      DB_URL: postgresql+psycopg://catalogo_app:${PASS_CATALOGO}@db-catalogo:5432/bd_catalogo
+      JWT_SECRET: ${JWT_SECRET}
+      SERVICE_TOKEN: ${SERVICE_TOKEN}
+    depends_on: { db-catalogo: { condition: service_healthy } }
+
+  prestamos:
+    build: ./prestamos
+    restart: unless-stopped
+    environment:
+      DB_URL: jdbc:postgresql://db-prestamos:5432/bd_prestamos
+      DB_USER: prestamos_app
+      DB_PASSWORD: ${PASS_PRESTAMOS}
+      JWT_SECRET: ${JWT_SECRET}
+      SERVICE_TOKEN: ${SERVICE_TOKEN}
+      USUARIOS_URL: http://usuarios:3001
+      CATALOGO_URL: http://catalogo:8000
+      NOTIFICACIONES_URL: http://notificaciones:8090
+      TARIFA_DIARIA: ${TARIFA_DIARIA}
+      LIMITE_PRESTAMOS: ${LIMITE_PRESTAMOS}
+      DIAS_PRESTAMO_LIBRO: ${DIAS_PRESTAMO_LIBRO}
+      DIAS_PRESTAMO_EQUIPO: ${DIAS_PRESTAMO_EQUIPO}
+      MAX_RENOVACIONES: ${MAX_RENOVACIONES}
+      HORAS_RESERVA: ${HORAS_RESERVA}
+      DIAS_TOLERANCIA: ${DIAS_TOLERANCIA}
+      TOPE_MULTA: ${TOPE_MULTA}
+      DIAS_AVISO: ${DIAS_AVISO}
+    depends_on: { db-prestamos: { condition: service_healthy } }
+
+  notificaciones:
+    build: ./notificaciones
+    restart: unless-stopped
+    environment:
+      DB_URL: postgres://notificaciones_app:${PASS_NOTIFICACIONES}@db-notificaciones:5432/bd_notificaciones
+      JWT_SECRET: ${JWT_SECRET}
+      SERVICE_TOKEN: ${SERVICE_TOKEN}
+    depends_on: { db-notificaciones: { condition: service_healthy } }
+
+  db-usuarios:
+    <<: *postgres
+    environment: { POSTGRES_DB: bd_usuarios, POSTGRES_USER: usuarios_app, POSTGRES_PASSWORD: "${PASS_USUARIOS}" }
+    volumes: ["datos-usuarios:/var/lib/postgresql/data"]
+
+  db-catalogo:
+    <<: *postgres
+    environment: { POSTGRES_DB: bd_catalogo, POSTGRES_USER: catalogo_app, POSTGRES_PASSWORD: "${PASS_CATALOGO}" }
+    volumes: ["datos-catalogo:/var/lib/postgresql/data"]
+
+  db-prestamos:
+    <<: *postgres
+    environment: { POSTGRES_DB: bd_prestamos, POSTGRES_USER: prestamos_app, POSTGRES_PASSWORD: "${PASS_PRESTAMOS}" }
+    volumes: ["datos-prestamos:/var/lib/postgresql/data"]
+
+  db-notificaciones:
+    <<: *postgres
+    environment: { POSTGRES_DB: bd_notificaciones, POSTGRES_USER: notificaciones_app, POSTGRES_PASSWORD: "${PASS_NOTIFICACIONES}" }
+    volumes: ["datos-notificaciones:/var/lib/postgresql/data"]
+
+volumes:
+  datos-usuarios:
+  datos-catalogo:
+  datos-prestamos:
+  datos-notificaciones:
+
+networks:
+  default:
+    name: red-interna

@@ -1,0 +1,75 @@
+
+tests/test_api.py::test_pi03_consulta_de_recurso_existente PASSED        [  1%]
+tests/test_api.py::test_recurso_inexistente_404_con_formato_comun PASSED [  3%]
+tests/test_api.py::test_pi04_busqueda_con_filtros PASSED                 [  5%]
+tests/test_api.py::test_pi05_alta_edicion_inactivacion PASSED            [  7%]
+tests/test_api.py::test_pi06_alumno_no_puede_gestionar_recursos PASSED   [  9%]
+tests/test_api.py::test_campos_obligatorios_faltantes_400 PASSED         [ 11%]
+tests/test_api.py::test_tipo_de_dato_invalido_400 PASSED                 [ 13%]
+tests/test_api.py::test_pi11_sin_token_o_token_vencido_401 PASSED        [ 15%]
+tests/test_api.py::test_endpoints_internos_rechazan_usuarios PASSED      [ 17%]
+tests/test_api.py::test_pi08_reserva_sin_existencias_409 PASSED          [ 19%]
+tests/test_api.py::test_flujo_interno_entrega_y_devolucion PASSED        [ 21%]
+tests/test_api.py::test_liberar_reserva_inexistente_404 PASSED           [ 23%]
+tests/test_api.py::test_categorias PASSED                                [ 25%]
+tests/test_api.py::test_correlacion_se_propaga PASSED                    [ 27%]
+tests/test_api.py::test_reservas_para_conciliar_solo_internas PASSED     [ 29%]
+tests/test_concurrencia_pg.py::test_pi09_solicitudes_simultaneas_no_sobreasignan[1-2] PASSED [ 31%]
+tests/test_concurrencia_pg.py::test_pi09_solicitudes_simultaneas_no_sobreasignan[1-20] PASSED [ 33%]
+tests/test_concurrencia_pg.py::test_pi09_solicitudes_simultaneas_no_sobreasignan[5-40] PASSED [ 35%]
+tests/test_concurrencia_pg.py::test_transicion_simultanea_del_mismo_prestamo_mueve_una_sola_unidad[entregar] PASSED [ 37%]
+tests/test_concurrencia_pg.py::test_transicion_simultanea_del_mismo_prestamo_mueve_una_sola_unidad[devolver] PASSED [ 39%]
+tests/test_concurrencia_pg.py::test_transicion_simultanea_del_mismo_prestamo_mueve_una_sola_unidad[liberar] PASSED [ 41%]
+tests/test_servicio.py::TestGestion::test_crear_asigna_id_y_disponibles PASSED [ 43%]
+tests/test_servicio.py::TestGestion::test_crear_rechaza_datos_invalidos[cambio0-titulo] PASSED [ 45%]
+tests/test_servicio.py::TestGestion::test_crear_rechaza_datos_invalidos[cambio1-existencias] PASSED [ 47%]
+tests/test_servicio.py::TestGestion::test_crear_rechaza_datos_invalidos[cambio2-categor\xeda] PASSED [ 49%]
+tests/test_servicio.py::TestGestion::test_crear_rechaza_datos_invalidos[cambio3-estado inicial] PASSED [ 50%]
+tests/test_servicio.py::TestGestion::test_modificar_ajusta_disponibles_con_el_cambio_de_existencias PASSED [ 52%]
+tests/test_servicio.py::TestGestion::test_no_permite_reducir_existencias_en_uso PASSED [ 54%]
+tests/test_servicio.py::TestGestion::test_inactivar_recurso_reservado_da_409 PASSED [ 56%]
+tests/test_servicio.py::TestGestion::test_inactivo_oculto_para_usuario_visible_para_staff PASSED [ 58%]
+tests/test_servicio.py::TestReservas::test_reserva_descuenta_una_unidad PASSED [ 60%]
+tests/test_servicio.py::TestReservas::test_reserva_es_idempotente_por_id_prestamo PASSED [ 62%]
+tests/test_servicio.py::TestReservas::test_sin_existencias_da_409_y_nunca_negativo PASSED [ 64%]
+tests/test_servicio.py::TestReservas::test_no_reserva_recurso_en_mantenimiento PASSED [ 66%]
+tests/test_servicio.py::TestReservas::test_ciclo_completo_reserva_entrega_devolucion PASSED [ 68%]
+tests/test_servicio.py::TestReservas::test_devolucion_con_dano_va_a_mantenimiento_y_se_repara PASSED [ 70%]
+tests/test_servicio.py::TestReservas::test_liberar_reserva_devuelve_la_unidad PASSED [ 72%]
+tests/test_servicio.py::TestReservas::test_operaciones_repetidas_son_idempotentes PASSED [ 74%]
+tests/test_servicio.py::TestReservas::test_no_se_libera_una_reserva_ya_entregada PASSED [ 76%]
+tests/test_servicio.py::TestReservas::test_reserva_cerrada_no_se_reabre PASSED [ 78%]
+tests/test_servicio.py::TestBusqueda::test_filtra_por_titulo_sin_importar_mayusculas PASSED [ 80%]
+tests/test_servicio.py::TestBusqueda::test_busca_por_codigo PASSED       [ 82%]
+tests/test_servicio.py::TestBusqueda::test_filtra_por_categoria_y_estado PASSED [ 84%]
+tests/test_servicio.py::TestBusqueda::test_sin_resultados_devuelve_lista_vacia PASSED [ 86%]
+tests/test_servicio.py::TestBusqueda::test_paginacion PASSED             [ 88%]
+tests/test_servicio.py::TestBusqueda::test_estado_de_filtro_invalido PASSED [ 90%]
+tests/test_servicio.py::TestCorreccionesNoviembre::test_busqueda_trata_comodines_como_texto PASSED [ 92%]
+tests/test_servicio.py::TestCorreccionesNoviembre::test_recurso_sin_ejemplares_no_aparece_en_mantenimiento PASSED [ 94%]
+tests/test_servicio.py::TestCorreccionesNoviembre::test_mantenimiento_por_dano_sigue_visible PASSED [ 96%]
+tests/test_servicio.py::TestCorreccionesNoviembre::test_devolucion_repetida_no_mueve_contadores_dos_veces PASSED [ 98%]
+tests/test_servicio.py::TestCorreccionesNoviembre::test_reservas_sin_recoger_para_conciliar PASSED [100%]
+
+=============================== warnings summary ===============================
+../../../venv/lib/python3.13/site-packages/starlette/testclient.py:40
+  /home/claude/venv/lib/python3.13/site-packages/starlette/testclient.py:40: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+
+---------- coverage: platform linux, python 3.13.18-final-0 ----------
+Name                 Stmts   Miss  Cover
+----------------------------------------
+app/__init__.py          0      0   100%
+app/config.py            9      1    89%
+app/errores.py          16      0   100%
+app/main.py            104      7    93%
+app/repositorio.py      69      2    97%
+app/seguridad.py        42      0   100%
+app/servicio.py        140     14    90%
+app/tablas.py            8      0   100%
+----------------------------------------
+TOTAL                  388     24    94%
+
+======================== 51 passed, 1 warning in 1.89s =========================

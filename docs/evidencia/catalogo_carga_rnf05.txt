@@ -1,0 +1,11 @@
+Prueba RNF05 · corrida el 21/11/2026 en el entorno de desarrollo
+Catálogo con uvicorn (2 workers) + PostgreSQL 16 local, 2,008 recursos (8 de la semilla + 2,000 sintéticos).
+Comando: python -m scripts.prueba_carga --url http://localhost:8001 --peticiones 3000 --concurrencia 20
+Nota: medición directa al servicio, sin gateway. Repetir con --url http://localhost:8080 una vez levantado docker compose.
+
+RNF05 · GET /api/v1/recursos · http://localhost:8001
+  peticiones      3000  (concurrencia 20, errores 0)
+  rendimiento     253 peticiones/s
+  p50 / p95 / p99 53.0 / 224.1 / 331.5 ms
+  máximo          676.4 ms
+  resultado       CUMPLE (objetivo p95 < 300 ms)

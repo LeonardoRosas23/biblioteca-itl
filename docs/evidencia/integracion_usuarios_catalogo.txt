@@ -1,0 +1,22 @@
+OK   PI01       Login válido del bibliotecario devuelve JWT                                   200
+OK   PI02       Credenciales inválidas: 401 con el mismo mensaje genérico                     Correo o contraseña incorrectos.
+OK   RN10       El autorregistro no puede crear BIBLIOTECARIO                                 403
+OK   CU08-A3    El registro exige correo institucional                                        Usa tu correo institucional (@itleon.edu.mx).
+OK   PI03/PI04  Catálogo (Python) acepta el JWT emitido por Usuarios (Node) y filtra          Cálculo diferencial
+OK   PI04       Filtro por categoría                                                          2
+OK   PI11       Token alterado: 401 en ambos servicios                                        401/401
+OK   PI06       Un ALUMNO no puede crear recursos (403)                                       ACCESO_DENEGADO
+OK   PI05a      Bibliotecario da de alta un recurso (201)                                     R014
+OK   CU03-A1    Campos obligatorios faltantes (400) con explicación                           Faltan campos obligatorios: categoria, ubicacion, existencias.
+OK   CU01-4     Usuarios responde el estado de la cuenta al servicio interno                  {'idUsuario': 'U102', 'nombre': 'Ana Alumna', 'rol': 'ALUMNO', 'estado': 'ACTIVO'}
+OK   D4/D7      Reserva atómica e idempotente: repetir el mismo folio no descuenta dos veces  0
+OK   PI08       Sin existencias: la segunda reserva distinta da 409                           SIN_EXISTENCIAS
+OK   PI05b      No se puede inactivar un recurso reservado (409)                              RECURSO_EN_USO
+OK   CU04       Entrega: el recurso pasa a PRESTADO                                           PRESTADO
+OK   CU05-A3    Devolución con daño: pasa a MANTENIMIENTO                                     MANTENIMIENTO
+OK   PI05c      Reparado e inactivado: el alumno ya no lo ve (404)                            404
+OK   5.7        Las rutas internas rechazan a usuarios aunque sean personal (403)             403
+OK   PI10       Cuenta bloqueada: login 403 y Préstamos la vería BLOQUEADA                    ACCESO_DENEGADO
+OK   D8         El X-Correlation-Id se devuelve en el cuerpo y el encabezado del error        {'codigo': 'RECURSO_NO_ENCONTRADO', 'mensaje': 'El recurso no existe.', 'correlacionId': 'e2e-7c1e'}
+
+20 de 20 casos correctos

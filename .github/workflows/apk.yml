@@ -1,0 +1,47 @@
+# Genera el APK de Android de la app y lo publica en la página de Releases del repositorio.
+# Se lanza a mano: Actions → "APK Android" → Run workflow, con la dirección del servidor.
+# Costo: gratis (repositorio público, runner estándar). El APK se guarda en Releases, que no cuenta
+# contra el almacenamiento de Actions; por eso no se sube también como artifact.
+name: APK Android
+
+on:
+  workflow_dispatch:
+    inputs:
+      api_url:
+        description: "Dirección del gateway que usará la app (p. ej. https://bibliotecaitl.duckdns.org)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults: { run: { working-directory: movil } }
+    env:
+      EXPO_PUBLIC_API_URL: ${{ inputs.api_url }}
+      VERSION_CODE: ${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: movil/package-lock.json }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - run: npm ci --legacy-peer-deps
+      - run: npx jest
+      - name: Generar el proyecto Android
+        run: |
+          echo "EXPO_PUBLIC_API_URL=$EXPO_PUBLIC_API_URL" > .env
+          CI=1 npx expo prebuild -p android --no-install
+      - name: Compilar el APK (arm64, firmado con la llave de depuración)
+        working-directory: movil/android
+        run: ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a --no-daemon
+      - name: Publicar en Releases
+        env: { GH_TOKEN: "${{ github.token }}" }
+        run: |
+          cp android/app/build/outputs/apk/release/app-release.apk biblioteca-itl.apk
+          gh release delete app-android -y --cleanup-tag || true
+          gh release create app-android biblioteca-itl.apk \
+            --title "App Android (build ${{ github.run_number }})" \
+            --notes "APK de la app Biblioteca ITL conectado a ${{ inputs.api_url }}. En el teléfono: abre este enlace, descarga biblioteca-itl.apk e instálalo (permite instalar apps de este origen)."

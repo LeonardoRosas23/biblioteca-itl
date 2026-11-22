@@ -1,0 +1,13 @@
+.env
+node_modules/
+.venv/
+__pycache__/
+.pytest_cache/
+.coverage
+coverage/
+dist/
+target/
+*.log
+.expo/
+gateway/certs/*.crt
+gateway/certs/*.key

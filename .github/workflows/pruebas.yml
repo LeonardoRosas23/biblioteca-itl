@@ -1,0 +1,154 @@
+# Pruebas de los seis componentes y prueba de punta a punta con Docker.
+# Costo: gratis. GitHub no cobra Actions en repositorios públicos con runners estándar (ubuntu-latest).
+# Corre en cada push y pull request; también se puede lanzar a mano desde la pestaña Actions.
+name: Pruebas
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: pruebas-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  usuarios:
+    name: Usuarios (Node.js)
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: usuarios } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: usuarios/package-lock.json }
+      - run: npm ci
+      - run: npx jest --coverage
+
+  catalogo:
+    name: Catálogo (Python)
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: catalogo } }
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env: { POSTGRES_USER: postgres, POSTGRES_PASSWORD: postgres, POSTGRES_DB: bd_catalogo_test }
+        ports: ["5432:5432"]
+        options: --health-cmd "pg_isready -U postgres" --health-interval 5s --health-retries 10
+    env:
+      TEST_PG_URL: postgresql+psycopg://postgres:postgres@localhost:5432/bd_catalogo_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.13", cache: pip, cache-dependency-path: catalogo/requirements-dev.txt }
+      - run: pip install -r requirements-dev.txt
+      - run: pytest -v --cov=app
+
+  prestamos:
+    name: Préstamos (Java)
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: prestamos } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 21, cache: maven }
+      - run: mvn -B test
+      - name: Reporte de pruebas y cobertura
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: prestamos-reportes
+          retention-days: 7          # se borran solos: no ocupan el almacenamiento gratuito
+          path: |
+            prestamos/target/surefire-reports
+            prestamos/target/site/jacoco
+
+  notificaciones:
+    name: Notificaciones (Go)
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: notificaciones } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with: { go-version-file: notificaciones/go.mod, cache-dependency-path: notificaciones/go.sum }
+      - run: go mod tidy
+      - run: go vet ./...
+      - run: go test -race -cover ./...
+
+  web:
+    name: Panel web (React)
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: web } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: web/package-lock.json }
+      - run: npm ci
+      - run: npx vitest run --coverage
+      - run: npm run build
+
+  movil:
+    name: App móvil (React Native)
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: movil } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: movil/package-lock.json }
+      - run: npm ci --legacy-peer-deps
+      - run: npx jest --coverage
+
+  e2e:
+    name: Sistema completo con Docker (PI01–PI19)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configuración (.env de prueba)
+        run: |
+          cp .env.example .env
+          sed -i "s|^JWT_SECRET=.*|JWT_SECRET=ci-$(openssl rand -hex 24)|; s|^SERVICE_TOKEN=.*|SERVICE_TOKEN=$(openssl rand -hex 16)|" .env
+      - name: Construir y levantar (incluye mvn package y go test dentro de las imágenes)
+        run: docker compose -f docker-compose.yml -f docker-compose.e2e.yml up -d --build
+      - name: Esperar a que respondan los cuatro servicios
+        run: |
+          for ruta in /health /api/v1/usuarios/me /api/v1/categorias /api/v1/prestamos /api/v1/notificaciones; do
+            for i in $(seq 1 90); do
+              codigo=$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:8080$ruta" || true)
+              if [ "$codigo" != "000" ] && [ "$codigo" -lt 500 ]; then echo "$ruta → $codigo"; break; fi
+              sleep 2
+            done
+          done
+      - name: Cargar datos de demostración
+        run: ./scripts/cargar-datos-demo.sh
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Integración front–back · panel web
+        working-directory: web
+        run: npm ci && npx vitest run src/test/integracion.test.jsx
+        env: { VITE_API_URL: "http://localhost:8080" }
+      - name: Integración front–back · app móvil
+        working-directory: movil
+        run: npm ci --legacy-peer-deps && npx jest __tests__/integracion.test.jsx
+        env: { E2E: "1", EXPO_PUBLIC_API_URL: "http://localhost:8080" }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.13" }
+      - name: Prueba de punta a punta por el gateway
+        run: |
+          pip install httpx PyJWT
+          export JWT_SECRET=$(grep '^JWT_SECRET=' .env | cut -d= -f2-)
+          python pruebas-integracion/e2e_gateway.py
+      - name: Prueba de carga RNF05
+        working-directory: catalogo
+        run: JWT_SECRET=$(grep '^JWT_SECRET=' ../.env | cut -d= -f2-) python -m scripts.prueba_carga --url http://localhost:8080 --peticiones 2000
+      - name: Evidencia
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencia-e2e
+          retention-days: 7
+          path: docs/evidencia/e2e_gateway.txt
+          if-no-files-found: ignore
+      - name: Registros de los contenedores si algo falló
+        if: failure()
+        run: docker compose logs --no-color --tail=200

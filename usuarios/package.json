@@ -1,0 +1,25 @@
+{
+  "name": "ms-usuarios",
+  "version": "0.1.0",
+  "description": "Microservicio de Usuarios y Autenticación (Node.js + Express)",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "jest --coverage",
+    "seed": "node scripts/seed.js"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coverageReporters": ["text-summary", "text"]
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
+  }
+}

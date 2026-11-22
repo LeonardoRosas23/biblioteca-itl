@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "Biblioteca ITL",
+    "slug": "biblioteca-itl",
+    "version": "0.1.0",
+    "orientation": "default",
+    "userInterfaceStyle": "light",
+    "ios": { "supportsTablet": true },
+    "android": { "adaptiveIcon": { "backgroundColor": "#1F3B4D" } },
+    "plugins": ["expo-secure-store"]
+  }
+}

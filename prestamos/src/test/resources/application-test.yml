@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:prestamos;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1;LOCK_TIMEOUT=10000
+    username: sa
+    password:
+  sql:
+    init:
+      mode: always
+
+tareas:
+  habilitadas: false
+
+seguridad:
+  jwt-secret: secreto-de-pruebas-con-al-menos-32-bytes!!

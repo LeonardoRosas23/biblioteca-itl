@@ -1,0 +1,65 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  application:
+    name: ms-prestamos
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/bd_prestamos}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  sql:
+    init:
+      mode: always
+  jackson:
+    default-property-inclusion: always
+    serialization:
+      write-dates-as-timestamps: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
+seguridad:
+  jwt-secret: ${JWT_SECRET:solo-para-desarrollo-cambiar-por-secreto-largo}
+  service-token: ${SERVICE_TOKEN:token-interno-dev}
+
+servicios:
+  usuarios-url: ${USUARIOS_URL:http://localhost:3001}
+  catalogo-url: ${CATALOGO_URL:http://localhost:8000}
+  notificaciones-url: ${NOTIFICACIONES_URL:http://localhost:8090}
+  timeout-ms: ${TIMEOUT_MS:2000}
+  max-reintentos: ${MAX_REINTENTOS:2}
+
+# Parámetros de negocio de la sección 2.3 (valores de ejemplo por confirmar con la institución)
+negocio:
+  zona-horaria: ${ZONA_HORARIA:America/Mexico_City}
+  limite-prestamos: ${LIMITE_PRESTAMOS:3}
+  dias-prestamo-libro: ${DIAS_PRESTAMO_LIBRO:7}
+  dias-prestamo-equipo: ${DIAS_PRESTAMO_EQUIPO:3}
+  dias-prestamo-laboratorio: ${DIAS_PRESTAMO_LABORATORIO:3}
+  max-renovaciones: ${MAX_RENOVACIONES:1}
+  horas-reserva: ${HORAS_RESERVA:72}
+  tarifa-diaria: ${TARIFA_DIARIA:10.00}
+  dias-tolerancia: ${DIAS_TOLERANCIA:0}
+  tope-multa: ${TOPE_MULTA:0}          # 0 = sin tope
+  dias-aviso: ${DIAS_AVISO:1}
+  dias-espera: ${DIAS_ESPERA:7}
+
+tareas:
+  cron-vencimientos: ${CRON_VENCIMIENTOS:0 0 8 * * *}
+  expirar-reservas-ms: ${EXPIRAR_RESERVAS_MS:900000}
+  eventos-ms: ${EVENTOS_MS:10000}
+  conciliar-ms: ${CONCILIAR_MS:600000}
+  eventos-max-intentos: ${EVENTOS_MAX_INTENTOS:8}

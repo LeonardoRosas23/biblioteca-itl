@@ -1,0 +1,9 @@
+# Ajustes para la prueba de punta a punta (pruebas-integracion/e2e_gateway.py):
+# las tareas programadas corren cada pocos segundos en lugar de una vez al día.
+#   docker compose -f docker-compose.yml -f docker-compose.e2e.yml up -d --build
+services:
+  prestamos:
+    environment:
+      CRON_VENCIMIENTOS: "*/10 * * * * *"   # CU09 cada 10 s (normalmente 8:00 a. m.)
+      EVENTOS_MS: "2000"                    # bandeja de salida cada 2 s
+      CONCILIAR_MS: "15000"

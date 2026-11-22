@@ -1,0 +1,77 @@
+=== RUN   TestValidar
+=== RUN   TestValidar/válido
+=== RUN   TestValidar/vencimiento_es_un_tipo_válido
+=== RUN   TestValidar/sin_usuario
+=== RUN   TestValidar/tipo_desconocido
+=== RUN   TestValidar/mensaje_vacío
+=== RUN   TestValidar/mensaje_largo
+=== RUN   TestValidar/todo_mal
+--- PASS: TestValidar (0.00s)
+    --- PASS: TestValidar/válido (0.00s)
+    --- PASS: TestValidar/vencimiento_es_un_tipo_válido (0.00s)
+    --- PASS: TestValidar/sin_usuario (0.00s)
+    --- PASS: TestValidar/tipo_desconocido (0.00s)
+    --- PASS: TestValidar/mensaje_vacío (0.00s)
+    --- PASS: TestValidar/mensaje_largo (0.00s)
+    --- PASS: TestValidar/todo_mal (0.00s)
+=== RUN   TestMensajeDe500CaracteresConAcentosEsValido
+--- PASS: TestMensajeDe500CaracteresConAcentosEsValido (0.00s)
+=== RUN   TestRetrocesoExponencial
+--- PASS: TestRetrocesoExponencial (0.00s)
+=== RUN   TestAgotarIntentosDejaDeReintentar
+--- PASS: TestAgotarIntentosDejaDeReintentar (0.00s)
+=== RUN   TestRecortaElError
+--- PASS: TestRecortaElError (0.00s)
+=== RUN   TestDebeReintentarse
+--- PASS: TestDebeReintentarse (0.00s)
+PASS
+coverage: 100.0% of statements
+ok  	github.com/itl/biblioteca/notificaciones/internal/dominio	1.015s	coverage: 100.0% of statements
+=== RUN   TestTokenValido
+--- PASS: TestTokenValido (0.00s)
+=== RUN   TestCompatibleConTokenDeNode
+--- PASS: TestCompatibleConTokenDeNode (0.00s)
+=== RUN   TestErrores
+=== RUN   TestErrores/firma_no_base64
+=== RUN   TestErrores/otro_secreto
+=== RUN   TestErrores/expirado
+=== RUN   TestErrores/alterado
+=== RUN   TestErrores/alg_none
+=== RUN   TestErrores/basura
+--- PASS: TestErrores (0.00s)
+    --- PASS: TestErrores/firma_no_base64 (0.00s)
+    --- PASS: TestErrores/otro_secreto (0.00s)
+    --- PASS: TestErrores/expirado (0.00s)
+    --- PASS: TestErrores/alterado (0.00s)
+    --- PASS: TestErrores/alg_none (0.00s)
+    --- PASS: TestErrores/basura (0.00s)
+=== RUN   TestSesionInternaEsStaff
+--- PASS: TestSesionInternaEsStaff (0.00s)
+PASS
+coverage: 90.3% of statements
+ok  	github.com/itl/biblioteca/notificaciones/internal/seguridad	1.013s	coverage: 90.3% of statements
+=== RUN   TestCrearGuardaYEnvia
+--- PASS: TestCrearGuardaYEnvia (0.00s)
+=== RUN   TestIdempotenciaPorClave
+--- PASS: TestIdempotenciaPorClave (0.00s)
+=== RUN   TestIdempotenciaConPeticionesSimultaneas
+--- PASS: TestIdempotenciaConPeticionesSimultaneas (0.00s)
+=== RUN   TestSoloServiciosInternosCrean
+--- PASS: TestSoloServiciosInternosCrean (0.00s)
+=== RUN   TestValidacion
+--- PASS: TestValidacion (0.00s)
+=== RUN   TestFalloDeEnvioYReintento
+--- PASS: TestFalloDeEnvioYReintento (0.00s)
+=== RUN   TestIntentosAgotados
+--- PASS: TestIntentosAgotados (0.00s)
+=== RUN   TestPermisosDeConsulta
+--- PASS: TestPermisosDeConsulta (0.00s)
+=== RUN   TestListarSoloLoPropioYMasRecientePrimero
+--- PASS: TestListarSoloLoPropioYMasRecientePrimero (0.00s)
+=== RUN   TestPaginacion
+--- PASS: TestPaginacion (0.00s)
+=== RUN   TestMarcarLeida
+--- PASS: TestMarcarLeida (0.00s)
+PASS
+coverage: 77.5% of statements
+ok  	github.com/itl/biblioteca/notificaciones/internal/servicio	1.015s	coverage: 77.5% of statements
