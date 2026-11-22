@@ -1,0 +1,27 @@
+Prueba de punta a punta por el gateway (http://localhost:8080) · GitHub Actions, 22/11/2026 03:05 UTC
+Ejecución: https://github.com/LeonardoRosas23/biblioteca-itl/actions/runs/44978722500
+
+OK   PI01     Login válido devuelve JWT y datos básicos  
+OK   PI02     Credenciales inválidas: 401 genérico, sin token  
+OK   PI03     Consulta de un recurso existente con su disponibilidad  
+OK   PI04     Búsqueda con filtros; sin resultados devuelve lista vacía  
+OK   PI05     Alta, edición e inactivación; inactivar uno reservado da 409  
+OK   PI06     Un ALUMNO no puede crear recursos ni aprobar entregas (403)  
+OK   PI07     Solicitud válida: PENDIENTE_ENTREGA y el recurso baja una existencia  
+OK   PI08     Recurso sin existencias: 409 con mensaje claro  
+OK   PI09     4 solicitudes simultáneas por la última existencia: una 201, las demás 409  
+OK   PI10     Multa pendiente o cuenta bloqueada: 403 y no se reserva  
+OK   PI11     Token alterado, inválido o expirado: 401 en los cuatro servicios  
+OK   PI12     Aprobación: ACTIVO con fecha límite y recurso PRESTADO; reserva expirada 409 y se libera  
+OK   PI13     Devolución a tiempo: FINALIZADO sin multa y recurso DISPONIBLE  
+OK   PI14     Devolución 3 días tarde: multa PENDIENTE de $30.00  
+OK   PI15     Renovación válida extiende 7 días; máximo, demanda y ajena se rechazan  
+OK   PI16     Historial y multas propios; lo ajeno devuelve 403  
+OK   PI17     La tarea programada envía el RECORDATORIO y marca VENCIDO (con su aviso)  
+OK   PI18     Con Notificaciones detenido el préstamo se crea y el aviso llega al volver  
+OK   PI19     Usuarios o Catálogo caídos: 503, sin préstamo ni reserva huérfana  
+OK   5.7      Las rutas internas no son accesibles desde fuera (403)  
+OK   D8       El X-Correlation-Id se propaga y vuelve en el error  
+OK   RNF06    El gateway responde por HTTPS (puerto 8443)  
+
+22 de 22 casos correctos

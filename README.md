@@ -1,5 +1,7 @@
 # Sistema de Gestión de Préstamo de Recursos Bibliotecarios · ITL
 
+[![Pruebas](https://github.com/LeonardoRosas23/biblioteca-itl/actions/workflows/pruebas.yml/badge.svg)](https://github.com/LeonardoRosas23/biblioteca-itl/actions/workflows/pruebas.yml)
+
 Proyecto Integrador de Aplicaciones Empresariales 2026-2 · Segundo avance de implementación (versión para despliegue).
 
 Arquitectura de microservicios políglota con clientes web y móvil:
@@ -42,16 +44,17 @@ Cuentas de prueba (contraseña `Biblio2026!` en desarrollo; en el servidor, la `
 
 ## Pruebas
 
-| Componente | Comando | Resultado (21/11/2026) |
+| Componente | Comando | Resultado en GitHub Actions (22/11/2026) |
 |---|---|---|
 | Usuarios | `cd usuarios && npm install && npm test` | 34/34 · 97 % líneas |
-| Catálogo | `cd catalogo && pip install -r requirements-dev.txt && pytest --cov=app` | 45/45 · 93 % (+6 de concurrencia con PostgreSQL) |
-| Préstamos | `cd prestamos && mvn test` | 82/82 en la versión anterior; **correr de nuevo**: hay 10 pruebas nuevas (ver abajo) |
-| Notificaciones | `cd notificaciones && go mod tidy && go test -race ./...` | Núcleo 34/34; **correr** `internal/api` (ver abajo) |
+| Catálogo | `cd catalogo && pip install -r requirements-dev.txt && pytest --cov=app` | 51/51 (6 de concurrencia con PostgreSQL) · 93 % |
+| Préstamos | `cd prestamos && mvn test` | 92/92 |
+| Notificaciones | `cd notificaciones && go mod tidy && go test -race ./...` | Todos los paquetes, incluidos la API (Fiber) y PostgreSQL |
 | Panel web | `cd web && npm install && npm test` | 48/48 · 98 % líneas |
 | App móvil | `cd movil && npm install --legacy-peer-deps && npm test` | 28/28 · 95 % líneas |
-| Integración Usuarios–Catálogo | `python pruebas-integracion/usuarios_catalogo.py` | 20/20 |
-| Rendimiento RNF05 | `cd catalogo && python -m scripts.prueba_carga` | p95 = 224 ms con 2,008 recursos (objetivo < 300 ms) |
+| Integración front–back | ver abajo | Panel 3/3 · App 2/2, contra el sistema completo |
+| Punta a punta PI01–PI19 | `python pruebas-integracion/e2e_gateway.py` | **22/22** ([`docs/evidencia/e2e_gateway.txt`](docs/evidencia/e2e_gateway.txt)) |
+| Rendimiento RNF05 | `cd catalogo && python -m scripts.prueba_carga` | p95 = 88 ms por el gateway (objetivo < 300 ms) |
 
 ### Pruebas con el sistema completo (segundo avance)
 
@@ -75,7 +78,7 @@ cd movil && E2E=1 EXPO_PUBLIC_API_URL=http://localhost:8080 npx jest __tests__/i
 - **APK de Android** (`.github/workflows/apk.yml`): Actions → *APK Android* → *Run workflow* con la dirección del servidor. El APK queda en la página de Releases.
 - **Servidor gratuito 24/7** en Oracle Cloud con HTTPS (Caddy + DuckDNS): guía completa en [`docs/despliegue.md`](docs/despliegue.md).
 
-Lo único que se hace a mano: las capturas de la app móvil ([`docs/capturas/LEEME.md`](docs/capturas/LEEME.md)) y la prueba de arranque en un segundo equipo (RNF02).
+Todo esto ya corrió y pasa en GitHub Actions. Lo único que se hace a mano: las capturas de la app móvil ([`docs/capturas/LEEME.md`](docs/capturas/LEEME.md)) y la prueba de arranque en un segundo equipo (RNF02).
 
 ## Desarrollo sin Docker
 

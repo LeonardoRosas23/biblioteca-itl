@@ -1,21 +1,24 @@
-MS Préstamos · reportes de Surefire y JaCoCo de la versión anterior (antes de quitar prestamos/target del entregable)
-Fecha de los reportes: 2026-11-16 21:41
+MS Préstamos · mvn -B test en GitHub Actions (Java 21), 22/11/2026
+Ejecución: https://github.com/LeonardoRosas23/biblioteca-itl/actions/runs/44978722500
 
-Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.092 s -- in mx.edu.itl.biblioteca.prestamos.dominio.CalculadoraMultaTest
-Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.100 s -- in mx.edu.itl.biblioteca.prestamos.dominio.EventoPendienteTest
-Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.026 s -- in mx.edu.itl.biblioteca.prestamos.dominio.PrestamoTest$Aprobar
-Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.034 s -- in mx.edu.itl.biblioteca.prestamos.dominio.PrestamoTest$Devolucion
-Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.051 s -- in mx.edu.itl.biblioteca.prestamos.dominio.PrestamoTest$Renovacion
-Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.024 s -- in mx.edu.itl.biblioteca.prestamos.dominio.PrestamoTest$Vencimiento
-Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.267 s -- in mx.edu.itl.biblioteca.prestamos.servicio.PrestamoServiceTest$Aprobar
-Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.410 s -- in mx.edu.itl.biblioteca.prestamos.servicio.PrestamoServiceTest$Devolver
-Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.293 s -- in mx.edu.itl.biblioteca.prestamos.servicio.PrestamoServiceTest$Historial
-Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.369 s -- in mx.edu.itl.biblioteca.prestamos.servicio.PrestamoServiceTest$Multas
-Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.509 s -- in mx.edu.itl.biblioteca.prestamos.servicio.PrestamoServiceTest$Renovar
-Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.484 s -- in mx.edu.itl.biblioteca.prestamos.servicio.PrestamoServiceTest$Solicitar
-Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.019 s -- in mx.edu.itl.biblioteca.prestamos.servicio.PrestamoServiceTest$Tareas
-Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.622 s -- in mx.edu.itl.biblioteca.prestamos.web.PrestamoApiTest
+Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.869 s -- in mx.edu.itl.biblioteca.prestamos.servicio.CorreccionesNoviembreTest
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.114 s -- in mx.edu.itl.biblioteca.prestamos.servicio.PrestamoServiceTest$Multas
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.132 s -- in mx.edu.itl.biblioteca.prestamos.servicio.PrestamoServiceTest$Tareas
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.112 s -- in mx.edu.itl.biblioteca.prestamos.servicio.PrestamoServiceTest$Historial
+Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.202 s -- in mx.edu.itl.biblioteca.prestamos.servicio.PrestamoServiceTest$Renovar
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.144 s -- in mx.edu.itl.biblioteca.prestamos.servicio.PrestamoServiceTest$Devolver
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.106 s -- in mx.edu.itl.biblioteca.prestamos.servicio.PrestamoServiceTest$Aprobar
+Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.186 s -- in mx.edu.itl.biblioteca.prestamos.servicio.PrestamoServiceTest$Solicitar
+Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.102 s -- in mx.edu.itl.biblioteca.prestamos.servicio.PrestamoServiceTest
+Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in mx.edu.itl.biblioteca.prestamos.dominio.PrestamoTest$Renovacion
+Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in mx.edu.itl.biblioteca.prestamos.dominio.PrestamoTest$Devolucion
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in mx.edu.itl.biblioteca.prestamos.dominio.PrestamoTest$Vencimiento
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in mx.edu.itl.biblioteca.prestamos.dominio.PrestamoTest$Aprobar
+Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.014 s -- in mx.edu.itl.biblioteca.prestamos.dominio.PrestamoTest
+Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.047 s -- in mx.edu.itl.biblioteca.prestamos.dominio.CalculadoraMultaTest
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in mx.edu.itl.biblioteca.prestamos.dominio.EventoPendienteTest
+Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.459 s -- in mx.edu.itl.biblioteca.prestamos.web.PrestamoApiTest
+Tests run: 92, Failures: 0, Errors: 0, Skipped: 0
+BUILD SUCCESS
 
-Total: 82 pruebas, 0 fallas · cobertura JaCoCo: 83.4% de líneas, 75.5% de ramas
-
-La versión actual agrega CorreccionesNoviembreTest (10 pruebas): volver a correr mvn test y reemplazar este archivo.
+Los reportes completos de Surefire y JaCoCo están en los Artifacts de cada ejecución (prestamos-reportes, 7 días).
