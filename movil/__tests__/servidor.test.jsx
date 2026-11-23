@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 import * as SecureStore from 'expo-secure-store';
-import { CLAVE_SERVIDOR, normalizarServidor } from '../src/api/cliente';
+import { API_URL_FABRICA, CLAVE_SERVIDOR, normalizarServidor } from '../src/api/cliente';
 import App from '../src/App';
 import { ANA, API_BASICA, simularApi } from './ayuda';
 
@@ -60,7 +60,7 @@ describe('Dirección del servidor configurable desde la app', () => {
   test('sin dirección guardada se usa la de fábrica', async () => {
     simularApi(API_BASICA);
     render(<App />);
-    expect(await screen.findByText('http://localhost:8080')).toBeTruthy();
+    expect(await screen.findByText(API_URL_FABRICA)).toBeTruthy();
   });
 
   test('la dirección guardada se recupera al abrir la app', async () => {
