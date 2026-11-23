@@ -3,6 +3,7 @@ import { usuarios } from '../api/servicios';
 import { Dialogo, MensajeError, Paginacion, fecha } from '../componentes/comunes';
 import { useConsulta } from '../hooks/useConsulta';
 import { useSesion } from '../sesion/SesionContext';
+import { errorPassword, revisarPassword } from '../politicaPassword';
 
 // Administración de cuentas (sección 5.7: solo ADMIN bloquea cuentas y asigna roles; RN10).
 
@@ -32,7 +33,8 @@ export function validarCuenta({ nombre, correo, password }) {
   const errores = {};
   if (!nombre.trim()) errores.nombre = 'Escribe el nombre completo.';
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo.trim())) errores.correo = 'Escribe un correo válido (nombre@itleon.edu.mx).';
-  if (password.length < 8) errores.password = 'La contraseña debe tener al menos 8 caracteres.';
+  const fallaPassword = errorPassword(password, correo.trim());
+  if (fallaPassword) errores.password = fallaPassword;
   return errores;
 }
 
@@ -102,6 +104,21 @@ function CambiarCuenta({ cuenta, esYo, alCerrar, alGuardar }) {
   );
 }
 
+/** Lista en vivo de los requisitos de la contraseña (RNF06, RNF07). */
+export function RequisitosPassword({ password, correo }) {
+  if (!password) return null;
+  return (
+    <ul className="requisitos" aria-label="Requisitos de la contraseña">
+      {revisarPassword(password, correo).map((r) => (
+        <li key={r.id} className={r.ok ? 'requisitos__ok' : 'requisitos__falta'}>
+          <span aria-hidden="true">{r.ok ? '✓' : '○'}</span> {r.texto}
+          <span className="solo-lector">{r.ok ? ' (cumple)' : ' (falta)'}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 function NuevaCuenta({ alCerrar, alGuardar }) {
   const [datos, setDatos] = useState({ nombre: '', correo: '', password: '', rol: 'BIBLIOTECARIO' });
   const [errores, setErrores] = useState({});
@@ -162,6 +179,7 @@ function NuevaCuenta({ alCerrar, alGuardar }) {
       {campo('nombre', 'Nombre')}
       {campo('correo', 'Correo institucional', 'email')}
       {campo('password', 'Contraseña inicial', 'password')}
+      <RequisitosPassword password={datos.password} correo={datos.correo.trim()} />
       <div className="campo">
         <label htmlFor="cuenta-rol-nuevo">Rol</label>
         <select id="cuenta-rol-nuevo" value={datos.rol} onChange={cambiar('rol')}>

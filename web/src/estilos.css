@@ -200,3 +200,9 @@ input[aria-invalid='true'], select[aria-invalid='true'] { border-color: var(--pe
 .pagina-aviso { max-width: 36rem; margin: 15vh auto; padding: 1rem; }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* Requisitos de contraseña (RNF06) */
+.requisitos { list-style: none; margin: -0.35rem 0 0.75rem; padding: 0; font-size: 0.875rem; display: grid; gap: 0.15rem; }
+.requisitos__ok { color: var(--ok); }
+.requisitos__falta { color: var(--texto-2); }
+.solo-lector { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

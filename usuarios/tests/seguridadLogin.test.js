@@ -14,10 +14,10 @@ const config = {
 describe('Seguridad del inicio de sesión y del registro', () => {
   test('tras varios fallos el correo queda en espera (429 con Retry-After) aunque luego use la contraseña correcta', async () => {
     const app = crearApp({ repo: crearRepoMemoria(), config });
-    await request(app).post('/api/v1/usuarios').send({ nombre: 'Ana', correo: 'ana@itl.mx', password: 'segura123' });
+    await request(app).post('/api/v1/usuarios').send({ nombre: 'Ana', correo: 'ana@itl.mx', password: 'Segura123!' });
     const intento = (password) => request(app).post('/api/v1/auth/login').send({ correo: 'ana@itl.mx', password });
     for (let i = 0; i < 3; i++) expect((await intento('mala')).status).toBe(401);
-    const r = await intento('segura123');
+    const r = await intento('Segura123!');
     expect(r.status).toBe(429);
     expect(r.body.codigo).toBe('DEMASIADOS_INTENTOS');
     expect(Number(r.headers['retry-after'])).toBeGreaterThan(0);
@@ -47,7 +47,7 @@ describe('Seguridad del inicio de sesión y del registro', () => {
 
   test('dos registros simultáneos con el mismo correo: uno 201 y otro 409 (no 500)', async () => {
     const app = crearApp({ repo: crearRepoMemoria(), config });
-    const body = { nombre: 'Beto', correo: 'beto@itl.mx', password: 'segura123' };
+    const body = { nombre: 'Beto', correo: 'beto@itl.mx', password: 'Segura123!' };
     const estados = (await Promise.all([1, 2].map(() => request(app).post('/api/v1/usuarios').send(body))))
       .map((r) => r.status).sort();
     expect(estados).toEqual([201, 409]);

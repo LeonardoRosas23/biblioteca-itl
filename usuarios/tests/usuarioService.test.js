@@ -3,7 +3,7 @@ const { UsuarioService } = require('../src/services/usuarioService');
 const { crearRepoMemoria } = require('../src/repos/memoryRepo');
 
 const config = { jwtSecret: 'secreto-prueba', jwtExpiraSeg: 3600, bcryptRondas: 4, dominioCorreo: '' };
-const base = { nombre: 'Ana', correo: 'ana@itl.mx', password: 'segura123' };
+const base = { nombre: 'Ana', correo: 'ana@itl.mx', password: 'Segura123!' };
 
 describe('UsuarioService (unitarias)', () => {
   let repo;
@@ -24,7 +24,7 @@ describe('UsuarioService (unitarias)', () => {
     test('guarda la contraseña como hash bcrypt, no en texto plano (RNF06)', async () => {
       await svc.registrar(base);
       const guardado = await repo.buscarPorCorreo('ana@itl.mx');
-      expect(guardado.passwordHash).not.toBe('segura123');
+      expect(guardado.passwordHash).not.toBe('Segura123!');
       expect(guardado.passwordHash).toMatch(/^\$2[aby]\$/);
     });
 
@@ -36,7 +36,7 @@ describe('UsuarioService (unitarias)', () => {
     test.each([
       [{ ...base, nombre: '' }, /nombre/],
       [{ ...base, correo: 'no-es-correo' }, /formato/],
-      [{ ...base, password: 'corta' }, /8 caracteres/],
+      [{ ...base, password: 'corta' }, /entre 8 y 64 caracteres/],
       [{ ...base, rol: 'SUPERUSUARIO' }, /Rol no válido/]
     ])('rechaza datos inválidos %#', async (datos, msg) => {
       await expect(svc.registrar(datos)).rejects.toMatchObject({ status: 400, message: expect.stringMatching(msg) });
@@ -67,7 +67,7 @@ describe('UsuarioService (unitarias)', () => {
     beforeEach(() => svc.registrar(base));
 
     test('emite un JWT con sub = idUsuario, rol y expiración', async () => {
-      const r = await svc.login({ correo: 'ana@itl.mx', password: 'segura123' });
+      const r = await svc.login({ correo: 'ana@itl.mx', password: 'Segura123!' });
       const datos = jwt.verify(r.token, 'secreto-prueba');
       expect(datos.sub).toBe(r.usuario.idUsuario);
       expect(datos.rol).toBe('ALUMNO');
@@ -77,7 +77,7 @@ describe('UsuarioService (unitarias)', () => {
 
     test('contraseña incorrecta y correo inexistente dan el mismo error genérico', async () => {
       const e1 = await svc.login({ correo: 'ana@itl.mx', password: 'mala12345' }).catch((e) => e);
-      const e2 = await svc.login({ correo: 'nadie@itl.mx', password: 'segura123' }).catch((e) => e);
+      const e2 = await svc.login({ correo: 'nadie@itl.mx', password: 'Segura123!' }).catch((e) => e);
       expect(e1.status).toBe(401);
       expect(e1.codigo).toBe('CREDENCIALES_INVALIDAS');
       expect(e2.message).toBe(e1.message);
@@ -86,11 +86,11 @@ describe('UsuarioService (unitarias)', () => {
     test('cuenta bloqueada responde 403', async () => {
       const u = await repo.buscarPorCorreo('ana@itl.mx');
       await repo.actualizar(u.idUsuario, { estado: 'BLOQUEADO' });
-      await expect(svc.login({ correo: 'ana@itl.mx', password: 'segura123' })).rejects.toMatchObject({ status: 403 });
+      await expect(svc.login({ correo: 'ana@itl.mx', password: 'Segura123!' })).rejects.toMatchObject({ status: 403 });
     });
 
     test('el token no contiene datos sensibles', async () => {
-      const r = await svc.login({ correo: 'ana@itl.mx', password: 'segura123' });
+      const r = await svc.login({ correo: 'ana@itl.mx', password: 'Segura123!' });
       const datos = jwt.decode(r.token);
       expect(Object.keys(datos).sort()).toEqual(['exp', 'iat', 'rol', 'sub']);
     });

@@ -66,8 +66,22 @@ describe('Registro en la app (CU08-A3)', () => {
     expect(await screen.findByText('Ya existe una cuenta con ese correo.')).toBeTruthy();
   });
 
+  test('muestra en vivo qué requisitos de la contraseña faltan y no envía una débil', async () => {
+    const api = simularApi(API_BASICA);
+    await abrirRegistro();
+    llenar({ password: 'biblioteca', confirmacion: 'biblioteca' });
+    expect(screen.getByLabelText('Una letra mayúscula: falta')).toBeTruthy();
+    expect(screen.getByLabelText('Una letra minúscula: cumple')).toBeTruthy();
+    fireEvent.press(screen.getByRole('button', { name: 'Crear cuenta' }));
+    expect(screen.getByText(/La contraseña debe cumplir: .*mayúscula.*número.*especial/)).toBeTruthy();
+    expect(api.mock.calls.some(([, o]) => o?.method === 'POST')).toBe(false);
+    fireEvent.changeText(screen.getByLabelText('Contraseña'), 'Biblio2026!');
+    expect(screen.getByLabelText('Un carácter especial (! @ # $ % & * - _ . ?): cumple')).toBeTruthy();
+  });
+
   test('validarRegistro', () => {
     expect(validarRegistro({ nombre: 'A', correo: 'a@b.mx', password: '1234567', confirmacion: '1234567' }).password).toBeTruthy();
-    expect(validarRegistro({ nombre: 'A', correo: 'a@b.mx', password: '12345678', confirmacion: '12345678' })).toEqual({});
+    expect(validarRegistro({ nombre: 'A', correo: 'a@b.mx', password: '12345678', confirmacion: '12345678' }).password).toMatch(/mayúscula/);
+    expect(validarRegistro({ nombre: 'A', correo: 'a@b.mx', password: 'Biblio2026!', confirmacion: 'Biblio2026!' })).toEqual({});
   });
 });

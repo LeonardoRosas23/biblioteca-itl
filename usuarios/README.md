@@ -14,7 +14,7 @@ Responsable: María Fernanda Navarro Negrete. Dueño de `bd_usuarios` (cuentas, 
 | PATCH | `/api/v1/usuarios/{id}/estado` | ADMIN · `{ estado?, rol? }` | 200, 400, 403, 404, 409 |
 | GET | `/health` | Público | 200 |
 
-Seguridad: contraseñas con bcrypt; el mensaje de error del login no dice si falló el correo o la contraseña, y tarda lo mismo en ambos casos; tras `LOGIN_MAX_INTENTOS` fallos en `LOGIN_VENTANA_SEG` el correo queda en espera (429 con `Retry-After`). Un ADMIN no puede bloquearse ni quitarse su propio rol.
+Seguridad: contraseñas con bcrypt y política de contraseña al registrar (`src/politicaPassword.js`: 8 a 64 caracteres, mayúscula, minúscula, número y carácter especial, sin espacios y sin el usuario del correo; la misma regla está en la app y el panel); el mensaje de error del login no dice si falló el correo o la contraseña, y tarda lo mismo en ambos casos; tras `LOGIN_MAX_INTENTOS` fallos en `LOGIN_VENTANA_SEG` el correo queda en espera (429 con `Retry-After`). Un ADMIN no puede bloquearse ni quitarse su propio rol.
 
 ## Variables de entorno
 

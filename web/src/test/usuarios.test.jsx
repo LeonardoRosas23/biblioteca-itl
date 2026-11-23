@@ -91,7 +91,14 @@ describe('Administración de usuarios (sección 5.7)', () => {
 
     await u.type(within(dialogo).getByLabelText('Nombre *'), 'Pedro Bibliotecario');
     await u.type(within(dialogo).getByLabelText('Correo institucional *'), 'pedro@itleon.edu.mx');
+    await u.type(within(dialogo).getByLabelText('Contraseña inicial *'), 'biblio');
+    expect(within(dialogo).getByText(/Una letra mayúscula/).closest('li')).toHaveClass('requisitos__falta');
+    await u.click(within(dialogo).getByRole('button', { name: 'Crear cuenta' }));
+    expect(within(dialogo).getByText(/La contraseña debe cumplir: .*mayúscula/)).toBeInTheDocument();
+    expect(enviado).toBeUndefined();
+    await u.clear(within(dialogo).getByLabelText('Contraseña inicial *'));
     await u.type(within(dialogo).getByLabelText('Contraseña inicial *'), 'Biblio2026!');
+    expect(within(dialogo).getByText(/Una letra mayúscula/).closest('li')).toHaveClass('requisitos__ok');
     await u.click(within(dialogo).getByRole('button', { name: 'Crear cuenta' }));
     expect(await screen.findByText('Cuenta U110 creada para pedro@itleon.edu.mx.')).toBeInTheDocument();
     expect(enviado).toEqual({ nombre: 'Pedro Bibliotecario', correo: 'pedro@itleon.edu.mx', password: 'Biblio2026!', rol: 'BIBLIOTECARIO' });
@@ -117,6 +124,7 @@ describe('Administración de usuarios (sección 5.7)', () => {
     expect(validarCuenta({ nombre: '', correo: 'x', password: '123' })).toEqual({
       nombre: expect.any(String), correo: expect.any(String), password: expect.any(String)
     });
-    expect(validarCuenta({ nombre: 'A', correo: 'a@b.mx', password: '12345678' })).toEqual({});
+    expect(validarCuenta({ nombre: 'A', correo: 'a@b.mx', password: '12345678' }).password).toMatch(/mayúscula.*especial/);
+    expect(validarCuenta({ nombre: 'A', correo: 'a@b.mx', password: 'Biblio2026!' })).toEqual({});
   });
 });

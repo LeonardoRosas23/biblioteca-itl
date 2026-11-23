@@ -40,11 +40,14 @@ t_admin = login("admin@itleon.edu.mx").json()["token"]
 r1, r2 = login("ana.alumna@itleon.edu.mx", "incorrecta"), login("nadie@itleon.edu.mx", "x12345678")
 caso("PI02", "Credenciales inválidas: 401 con el mismo mensaje genérico", r1.status_code == r2.status_code == 401 and r1.json()["mensaje"] == r2.json()["mensaje"], r1.json()["mensaje"])
 
-r = httpx.post(f"{U}/api/v1/usuarios", json={"nombre": "X", "correo": f"x{uuid.uuid4().hex[:6]}@itleon.edu.mx", "password": "segura123", "rol": "BIBLIOTECARIO"})
+r = httpx.post(f"{U}/api/v1/usuarios", json={"nombre": "X", "correo": f"x{uuid.uuid4().hex[:6]}@itleon.edu.mx", "password": "Segura123!", "rol": "BIBLIOTECARIO"})
 caso("RN10", "El autorregistro no puede crear BIBLIOTECARIO", r.status_code == 403, r.status_code)
 
-r = httpx.post(f"{U}/api/v1/usuarios", json={"nombre": "Externo", "correo": "alguien@gmail.com", "password": "segura123"})
+r = httpx.post(f"{U}/api/v1/usuarios", json={"nombre": "Externo", "correo": "alguien@gmail.com", "password": "Segura123!"})
 caso("CU08-A3", "El registro exige correo institucional", r.status_code == 400, r.json().get("mensaje"))
+
+r = httpx.post(f"{U}/api/v1/usuarios", json={"nombre": "Débil", "correo": f"d{uuid.uuid4().hex[:6]}@itleon.edu.mx", "password": "segura123"})
+caso("RNF06", "El registro rechaza una contraseña débil y dice qué falta", r.status_code == 400 and "mayúscula" in r.json().get("mensaje", ""), r.json().get("mensaje"))
 
 # ---------------- integración Node → Python: el JWT de Usuarios abre Catálogo ----------------
 r = httpx.get(f"{C}/api/v1/recursos", headers=h(t_ana), params={"titulo": "cálculo"})

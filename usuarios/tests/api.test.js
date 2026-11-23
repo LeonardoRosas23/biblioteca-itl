@@ -13,17 +13,17 @@ async function preparar() {
     return token ? r.set('Authorization', `Bearer ${token}`) : r;
   };
   const login = async (correo) =>
-    (await request(app).post('/api/v1/auth/login').send({ correo, password: 'segura123' })).body.token;
+    (await request(app).post('/api/v1/auth/login').send({ correo, password: 'Segura123!' })).body.token;
   const adminToken = jwt.sign({ rol: 'ADMIN' }, config.jwtSecret, { subject: 'U1' });
-  await reg({ nombre: 'Ana', correo: 'ana@itl.mx', password: 'segura123' });
-  await reg({ nombre: 'Laura', correo: 'lau@itl.mx', password: 'segura123', rol: 'BIBLIOTECARIO' }, adminToken);
+  await reg({ nombre: 'Ana', correo: 'ana@itl.mx', password: 'Segura123!' });
+  await reg({ nombre: 'Laura', correo: 'lau@itl.mx', password: 'Segura123!', rol: 'BIBLIOTECARIO' }, adminToken);
   return { app, reg, login, adminToken };
 }
 
 describe('API de Usuarios (endpoints)', () => {
   test('PI01: login válido devuelve token y datos básicos', async () => {
     const { app } = await preparar();
-    const r = await request(app).post('/api/v1/auth/login').send({ correo: 'ana@itl.mx', password: 'segura123' });
+    const r = await request(app).post('/api/v1/auth/login').send({ correo: 'ana@itl.mx', password: 'Segura123!' });
     expect(r.status).toBe(200);
     expect(r.body).toMatchObject({ tipo: 'Bearer', usuario: { rol: 'ALUMNO' } });
     expect(r.body.token).toBeTruthy();
@@ -40,8 +40,8 @@ describe('API de Usuarios (endpoints)', () => {
 
   test('registro público devuelve 201 y duplicado 409', async () => {
     const { reg } = await preparar();
-    expect((await reg({ nombre: 'Beto', correo: 'beto@itl.mx', password: 'segura123' })).status).toBe(201);
-    expect((await reg({ nombre: 'Beto', correo: 'beto@itl.mx', password: 'segura123' })).status).toBe(409);
+    expect((await reg({ nombre: 'Beto', correo: 'beto@itl.mx', password: 'Segura123!' })).status).toBe(201);
+    expect((await reg({ nombre: 'Beto', correo: 'beto@itl.mx', password: 'Segura123!' })).status).toBe(409);
   });
 
   test('GET /usuarios/me requiere token (401) y lo resuelve con token', async () => {
@@ -84,7 +84,7 @@ describe('API de Usuarios (endpoints)', () => {
     const ok = await request(app).patch('/api/v1/usuarios/U100/estado')
       .set('Authorization', `Bearer ${adminToken}`).send({ estado: 'BLOQUEADO' });
     expect(ok.status).toBe(200);
-    const r = await request(app).post('/api/v1/auth/login').send({ correo: 'ana@itl.mx', password: 'segura123' });
+    const r = await request(app).post('/api/v1/auth/login').send({ correo: 'ana@itl.mx', password: 'Segura123!' });
     expect(r.status).toBe(403);
   });
 

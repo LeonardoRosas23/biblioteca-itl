@@ -4,6 +4,7 @@ import { api } from '../api/cliente';
 import { Boton, Mensaje } from '../componentes/comunes';
 import { useSesion } from '../sesion/SesionContext';
 import { base, color } from '../tema';
+import { errorPassword, revisarPassword } from '../politicaPassword';
 
 // CU08-A3 · Registro de alumnos y profesores (RN10: el autorregistro solo crea esos dos roles).
 
@@ -17,7 +18,8 @@ export function validarRegistro({ nombre, correo, password, confirmacion }) {
   const e = {};
   if (!nombre.trim()) e.nombre = 'Escribe tu nombre completo.';
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo.trim())) e.correo = 'Escribe tu correo institucional (nombre@itleon.edu.mx).';
-  if (password.length < 8) e.password = 'La contraseña debe tener al menos 8 caracteres.';
+  const fallaPassword = errorPassword(password, correo.trim());
+  if (fallaPassword) e.password = fallaPassword;
   else if (password !== confirmacion) e.confirmacion = 'Las contraseñas no coinciden.';
   return e;
 }
@@ -33,6 +35,24 @@ function Campo({ etiqueta, error, ...props }) {
         {...props}
       />
       {error ? <Text style={s.error}>{error}</Text> : null}
+    </View>
+  );
+}
+
+/** Lista en vivo de los requisitos de la contraseña (RNF06, RNF07). */
+export function RequisitosPassword({ password, correo }) {
+  if (!password) return null;
+  return (
+    <View style={s.requisitos} accessibilityLabel="Requisitos de la contraseña">
+      {revisarPassword(password, correo).map((r) => (
+        <Text
+          key={r.id}
+          style={[s.requisito, { color: r.ok ? color.ok : color.texto2 }]}
+          accessibilityLabel={`${r.texto}: ${r.ok ? 'cumple' : 'falta'}`}
+        >
+          {r.ok ? '✓' : '○'} {r.texto}
+        </Text>
+      ))}
     </View>
   );
 }
@@ -84,6 +104,7 @@ export default function Registro({ navigation }) {
           placeholder="correo@itleon.edu.mx"
         />
         <Campo etiqueta="Contraseña" value={datos.password} onChangeText={cambiar('password')} error={errores.password} secureTextEntry autoComplete="new-password" />
+        <RequisitosPassword password={datos.password} correo={datos.correo.trim()} />
         <Campo
           etiqueta="Confirmar contraseña"
           value={datos.confirmacion}
@@ -124,6 +145,8 @@ const s = StyleSheet.create({
   fondo: { flex: 1, backgroundColor: color.papel },
   contenido: { padding: 16, gap: 12, width: '100%', maxWidth: 480, alignSelf: 'center' },
   error: { color: color.peligro, fontSize: 14 },
+  requisitos: { gap: 2, marginTop: -4 },
+  requisito: { fontSize: 14 },
   opciones: { flexDirection: 'row', gap: 8 },
   opcion: {
     flex: 1, minHeight: 48, borderWidth: 1, borderColor: color.tinta, borderRadius: 6,

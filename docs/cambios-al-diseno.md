@@ -48,6 +48,7 @@ El cambio se hizo para que cada uno de los cuatro servicios tuviera un responsab
 | 4.2, 7.4 | Estados del recurso: DISPONIBLE, RESERVADO, PRESTADO, MANTENIMIENTO, INACTIVO | Además `SIN_EXISTENCIAS` ("Sin existencias") | Un recurso con 0 existencias se mostraba como "En mantenimiento" |
 | 5.5 Usuarios (nuevo) | — | `GET /api/v1/usuarios` (búsqueda paginada, personal) | Lo necesita la pantalla de Usuarios del panel |
 | 5.5 Usuarios | — | El login responde 429 tras varios intentos fallidos | RNF06: evita adivinar contraseñas por fuerza bruta |
+| 5.5 Usuarios | La contraseña solo pedía 8 caracteres | Política de contraseña: 8 a 64 caracteres, mayúscula, minúscula, número, carácter especial, sin espacios y sin el usuario del correo; la app y el panel muestran en vivo qué requisito falta | RNF06: contraseñas difíciles de adivinar (guía NIST SP 800-63B / OWASP) |
 | 5.5 Notificaciones | `GET /notificaciones/{id}`: interno o propietario | También el personal | Consistente con RN09: el bibliotecario consulta lo de cualquier usuario |
 | 7.1, 7.3 | Panel con Recursos, Préstamos y devoluciones, Multas | Además **Usuarios** (solo ADMIN) | Actor administrador (3.1) y tabla 5.7: bloquear cuentas y asignar roles |
 | 7.2 | Seis pantallas móviles | Además la pantalla de **Registro** | CU08-A3 y el enlace "¿No tienes cuenta? Regístrate" de la maqueta 1 |

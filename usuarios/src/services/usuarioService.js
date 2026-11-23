@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { errores } = require('../errors');
 const { LimiteIntentos } = require('../limiteIntentos');
+const { errorPassword } = require('../politicaPassword');
 
 const ROLES = ['ALUMNO', 'PROFESOR', 'BIBLIOTECARIO', 'ADMIN'];
 const ROLES_AUTORREGISTRO = ['ALUMNO', 'PROFESOR'];
@@ -39,7 +40,8 @@ class UsuarioService {
     if (dom && !correo.toLowerCase().endsWith(`@${dom}`)) {
       throw errores.datosInvalidos(`Usa tu correo institucional (@${dom}).`);
     }
-    if (String(password).length < 8) throw errores.datosInvalidos('La contraseña debe tener al menos 8 caracteres.');
+    const fallaPassword = errorPassword(password, correo);
+    if (fallaPassword) throw errores.datosInvalidos(fallaPassword);
     if (rol && !ROLES.includes(rol)) throw errores.datosInvalidos(`Rol no válido. Usa uno de: ${ROLES.join(', ')}.`);
   }
 
