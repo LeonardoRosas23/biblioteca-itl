@@ -121,6 +121,38 @@ jobs:
           done
           docker compose -f docker-compose.yml -f docker-compose.prod.yml ps
 
+  usuarios-catalogo:
+    name: Integración Usuarios ↔ Catálogo (Node + Python)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configuración (.env de prueba)
+        run: |
+          cp .env.example .env
+          sed -i "s|^JWT_SECRET=.*|JWT_SECRET=ci-$(openssl rand -hex 24)|; s|^SERVICE_TOKEN=.*|SERVICE_TOKEN=$(openssl rand -hex 16)|" .env
+      - name: Levantar Usuarios y Catálogo con sus bases
+        run: docker compose -f docker-compose.yml -f pruebas-integracion/puertos-usuarios-catalogo.yml up -d --build usuarios catalogo
+      - name: Esperar a que respondan
+        run: |
+          for url in http://localhost:3001/health http://localhost:8000/health; do
+            for i in $(seq 1 60); do curl -sf "$url" >/dev/null && { echo "$url OK"; break; }; sleep 2; done
+          done
+      - name: Datos de prueba
+        run: |
+          docker compose exec -T usuarios node scripts/seed.js
+          docker compose exec -T catalogo python -m scripts.seed
+          docker compose exec -T db-catalogo psql -q -v ON_ERROR_STOP=1 -U catalogo_app -d bd_catalogo < catalogo/db/demo.sql
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.13" }
+      - name: Prueba de integración
+        run: |
+          pip install httpx
+          python pruebas-integracion/usuarios_catalogo.py http://localhost:3001 http://localhost:8000 "$(grep '^SERVICE_TOKEN=' .env | cut -d= -f2-)" | tee usuarios_catalogo.txt
+      - name: Registros si algo falló
+        if: failure()
+        run: docker compose logs --tail 80
+
   e2e:
     name: Sistema completo con Docker (PI01–PI19)
     runs-on: ubuntu-latest

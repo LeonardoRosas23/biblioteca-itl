@@ -1,0 +1,8 @@
+# Publica Usuarios y Catálogo para la prueba usuarios_catalogo.py (solo pruebas; en uso normal
+# únicamente el gateway se publica):
+#   docker compose -f docker-compose.yml -f pruebas-integracion/puertos-usuarios-catalogo.yml up -d --build usuarios catalogo
+services:
+  usuarios:
+    ports: ["3001:3001"]
+  catalogo:
+    ports: ["8000:8000"]
