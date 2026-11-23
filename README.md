@@ -20,6 +20,10 @@ Arquitectura de microservicios políglota con clientes web y móvil:
 
 Cada servicio tiene su propio README con sus endpoints, variables y pruebas. Cada uno es dueño de su base PostgreSQL y la crea al arrancar (diagramas en [`docs/base-de-datos.md`](docs/base-de-datos.md)). En qué difiere lo implementado de la propuesta y del documento de diseño: [`docs/cambios-al-diseno.md`](docs/cambios-al-diseno.md).
 
+## Uso local (laptop + teléfono)
+
+Guía paso a paso para correr todo en una laptop con Windows 11 y usar la app en un teléfono Android por Wi-Fi o cable USB: [`docs/uso-local.md`](docs/uso-local.md).
+
 ## Arranque completo con Docker
 
 ```bash
@@ -51,7 +55,7 @@ Cuentas de prueba (contraseña `Biblio2026!` en desarrollo; en el servidor, la `
 | Préstamos | `cd prestamos && mvn test` | 92/92 |
 | Notificaciones | `cd notificaciones && go mod tidy && go test -race ./...` | Todos los paquetes, incluidos la API (Fiber) y PostgreSQL |
 | Panel web | `cd web && npm install && npm test` | 48/48 · 98 % líneas |
-| App móvil | `cd movil && npm install --legacy-peer-deps && npm test` | 28/28 · 95 % líneas |
+| App móvil | `cd movil && npm install --legacy-peer-deps && npm test` | 34/34 · 95 % líneas |
 | Integración front–back | ver abajo | Panel 3/3 · App 2/2, contra el sistema completo |
 | Punta a punta PI01–PI19 | `python pruebas-integracion/e2e_gateway.py` | **22/22** ([`docs/evidencia/e2e_gateway.txt`](docs/evidencia/e2e_gateway.txt)) |
 | Rendimiento RNF05 | `cd catalogo && python -m scripts.prueba_carga` | p95 = 88 ms por el gateway (objetivo < 300 ms) |

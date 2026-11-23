@@ -1,3 +1,5 @@
+import * as SecureStore from 'expo-secure-store';
+
 // Cliente HTTP de la app: mismo contrato que el panel (JWT, X-Correlation-Id, formato de error común).
 
 export class ApiError extends Error {
@@ -8,8 +10,52 @@ export class ApiError extends Error {
   }
 }
 
-// En un emulador Android, "localhost" del equipo es 10.0.2.2; se configura con EXPO_PUBLIC_API_URL.
-export const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8080';
+// Dirección del gateway. La de fábrica viene de EXPO_PUBLIC_API_URL al compilar; la persona puede cambiarla
+// desde la pantalla de inicio de sesión ("Servidor"), y se guarda en el teléfono. Así un mismo APK sirve
+// con la laptop en cualquier red Wi-Fi (http://IP-de-la-laptop:8080), por cable USB con
+// "adb reverse" (http://localhost:8080) o con un servidor en la nube (https://…).
+export const API_URL_FABRICA = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:8080';
+export const CLAVE_SERVIDOR = 'biblio.app.servidor';
+let apiUrl = API_URL_FABRICA;
+
+export const servidorActual = () => apiUrl;
+
+/** Acepta "192.168.1.50:8080", "http://192.168.1.50:8080/" o "https://dominio"; devuelve null si no es válida. */
+export function normalizarServidor(texto) {
+  let t = String(texto || '').trim();
+  if (!t) return null;
+  if (!/^https?:\/\//i.test(t)) t = `http://${t}`;
+  t = t.replace(/\/+$/, '').replace(/^https?/i, (m) => m.toLowerCase());
+  return /^https?:\/\/[A-Za-z0-9.-]+(:\d{1,5})?$/.test(t) ? t : null;
+}
+
+export async function cargarServidor() {
+  try {
+    apiUrl = (await SecureStore.getItemAsync(CLAVE_SERVIDOR)) || API_URL_FABRICA;
+  } catch {
+    // sin almacén disponible: se usa la dirección de fábrica
+  }
+  return apiUrl;
+}
+
+export async function guardarServidor(url) {
+  apiUrl = url;
+  await SecureStore.setItemAsync(CLAVE_SERVIDOR, url);
+}
+
+/** true si el gateway responde en url/health antes de 5 segundos. */
+export async function probarServidor(url) {
+  const ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+  const t = setTimeout(() => ctrl?.abort(), 5000);
+  try {
+    const r = await fetch(`${url}/health`, { signal: ctrl?.signal });
+    return r.ok;
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(t);
+  }
+}
 
 let obtenerToken = () => null;
 let alNoAutorizado = () => {};
@@ -31,13 +77,17 @@ export async function pedir(ruta, { metodo = 'GET', cuerpo, params } = {}) {
 
   let res;
   try {
-    res = await fetch(`${API_URL}${ruta}${qs ? `?${qs}` : ''}`, {
+    res = await fetch(`${apiUrl}${ruta}${qs ? `?${qs}` : ''}`, {
       method: metodo,
       headers: cabeceras,
       body: cuerpo !== undefined ? JSON.stringify(cuerpo) : undefined
     });
   } catch {
-    throw new ApiError(0, 'SIN_CONEXION', 'No hay conexión con la biblioteca. Revisa tu internet e inténtalo de nuevo.');
+    throw new ApiError(
+      0,
+      'SIN_CONEXION',
+      `No hay conexión con la biblioteca (${apiUrl}). Revisa tu conexión o la dirección del servidor e inténtalo de nuevo.`
+    );
   }
   if (res.status === 204) return null;
   const datos = await res.json().catch(() => null);

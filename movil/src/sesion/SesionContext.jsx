@@ -1,6 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { api, configurarCliente } from '../api/cliente';
+import { api, cargarServidor, configurarCliente } from '../api/cliente';
 
 // Sesión de la app móvil:
 // - El token vive en el almacén seguro del sistema (Keychain en iOS, Keystore en Android), no en texto plano.
@@ -34,7 +34,8 @@ export function SesionProvider({ children, reloj = relojSistema }) {
   // Restaurar al abrir la app
   useEffect(() => {
     let vigente = true;
-    SecureStore.getItemAsync(CLAVE)
+    cargarServidor()
+      .then(() => SecureStore.getItemAsync(CLAVE))
       .then((txt) => {
         const s = txt ? JSON.parse(txt) : null;
         if (s && s.expiraEnMs > reloj()) return s;

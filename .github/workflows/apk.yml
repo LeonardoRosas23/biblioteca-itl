@@ -8,8 +8,9 @@ on:
   workflow_dispatch:
     inputs:
       api_url:
-        description: "Dirección del gateway que usará la app (p. ej. https://bibliotecaitl.duckdns.org)"
+        description: "Servidor de fábrica de la app (se puede cambiar después en la app, en 'Cambiar servidor')"
         required: true
+        default: "http://localhost:8080"
 
 permissions:
   contents: write
@@ -44,4 +45,4 @@ jobs:
           gh release delete app-android -y --cleanup-tag || true
           gh release create app-android biblioteca-itl.apk \
             --title "App Android (build ${{ github.run_number }})" \
-            --notes "APK de la app Biblioteca ITL conectado a ${{ inputs.api_url }}. En el teléfono: abre este enlace, descarga biblioteca-itl.apk e instálalo (permite instalar apps de este origen)."
+            --notes "APK de la app Biblioteca ITL. Servidor de fábrica: ${{ inputs.api_url }} (se cambia en la pantalla de inicio de sesión → Cambiar servidor). En el teléfono: descarga biblioteca-itl.apk e instálalo (permite instalar apps de este origen). Guía: docs/uso-local.md"
