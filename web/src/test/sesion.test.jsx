@@ -1,7 +1,7 @@
 import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, test, vi } from 'vitest';
-import { CLAVE } from '../sesion/SesionContext';
+import { CLAVE, CLAVE_CIERRE, MENSAJE_OTRA_PESTANA } from '../sesion/SesionContext';
 import { API_BASICA, BIBLIO, guardarSesion, renderApp, simularApi } from './utilidades';
 
 const loginOk = (rol = 'BIBLIOTECARIO', expiraEn = 3600) => [
@@ -109,16 +109,53 @@ describe('Manejo de sesiones', () => {
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
 
-  test('cerrar sesión en otra pestaña también la cierra aquí', async () => {
+  test('cerrar sesión deja el aviso para las demás pestañas en localStorage', async () => {
+    localStorage.clear();
+    guardarSesion();
+    simularApi(API_BASICA);
+    renderApp('/prestamos');
+    await userEvent.setup().click(await screen.findByRole('button', { name: 'Cerrar sesión' }));
+    expect(JSON.parse(localStorage.getItem(CLAVE_CIERRE))).toMatchObject({ idUsuario: BIBLIO.idUsuario });
+  });
+
+  // sessionStorage es independiente por pestaña: el aviso real llega como evento "storage" de localStorage
+  const avisoDeOtraPestana = (idUsuario) =>
+    act(() => {
+      const valor = JSON.stringify({ idUsuario, en: Date.now() });
+      localStorage.setItem(CLAVE_CIERRE, valor);
+      window.dispatchEvent(new StorageEvent('storage', { key: CLAVE_CIERRE, newValue: valor }));
+    });
+
+  test('cerrar sesión en otra pestaña con la misma cuenta también la cierra aquí', async () => {
+    localStorage.clear();
     guardarSesion();
     simularApi(API_BASICA);
     renderApp('/prestamos');
     await screen.findByRole('heading', { name: 'Préstamos y devoluciones' });
-    act(() => {
-      sessionStorage.removeItem(CLAVE);
-      window.dispatchEvent(new StorageEvent('storage', { key: CLAVE, newValue: null }));
-    });
+    avisoDeOtraPestana(BIBLIO.idUsuario);
     expect(screen.getByTestId('ruta')).toHaveTextContent('/login');
+    expect(screen.getByText(MENSAJE_OTRA_PESTANA)).toBeInTheDocument();
+    expect(sessionStorage.getItem(CLAVE)).toBeNull();
+  });
+
+  test('el aviso de otra cuenta no cierra esta pestaña', async () => {
+    localStorage.clear();
+    guardarSesion();
+    simularApi(API_BASICA);
+    renderApp('/prestamos');
+    await screen.findByRole('heading', { name: 'Préstamos y devoluciones' });
+    avisoDeOtraPestana('U999');
+    expect(screen.getByTestId('ruta')).toHaveTextContent('/prestamos');
+  });
+
+  test('un cambio en la sesión de esta pestaña no se confunde con el aviso', async () => {
+    localStorage.clear();
+    guardarSesion();
+    simularApi(API_BASICA);
+    renderApp('/prestamos');
+    await screen.findByRole('heading', { name: 'Préstamos y devoluciones' });
+    act(() => window.dispatchEvent(new StorageEvent('storage', { key: CLAVE, newValue: null })));
+    expect(screen.getByTestId('ruta')).toHaveTextContent('/prestamos');
   });
 
   test('con sesión abierta, entrar a /login lleva directo al panel', async () => {

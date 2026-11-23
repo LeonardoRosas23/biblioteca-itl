@@ -4,10 +4,14 @@ import { auth } from '../api/servicios';
 
 // Manejo de sesión del panel:
 // - El token se guarda en sessionStorage: sobrevive a recargar la página pero se borra al cerrar la pestaña.
+// - Cerrar sesión en una pestaña la cierra en las demás pestañas con la misma cuenta: como sessionStorage
+//   es independiente por pestaña, el aviso viaja por localStorage (CLAVE_CIERRE), que sí se comparte.
 // - La sesión se cierra sola al llegar la expiración del JWT o ante cualquier 401 del servidor.
 // - Solo el personal (BIBLIOTECARIO, ADMIN) entra al panel; alumnos y profesores usan la app móvil.
 
 export const CLAVE = 'biblio.panel.sesion';
+export const CLAVE_CIERRE = 'biblio.panel.cierre';
+export const MENSAJE_OTRA_PESTANA = 'Cerraste sesión en otra pestaña.';
 export const ROLES_PANEL = ['BIBLIOTECARIO', 'ADMIN'];
 
 const SesionContext = createContext(null);
@@ -34,7 +38,17 @@ export function SesionProvider({ children, reloj = relojSistema }) {
   sesionRef.current = sesion;
 
   const cerrarSesion = useCallback((motivo = null) => {
+    const actual = sesionRef.current;
     sessionStorage.removeItem(CLAVE);
+    // Cierre manual (sin motivo): avisar a las demás pestañas. Los cierres por expiración o 401 no se propagan,
+    // porque cada pestaña los detecta por su cuenta.
+    if (motivo === null && actual) {
+      try {
+        localStorage.setItem(CLAVE_CIERRE, JSON.stringify({ idUsuario: actual.usuario.idUsuario, en: Date.now() }));
+      } catch {
+        /* sin localStorage (modo privado estricto): solo se cierra esta pestaña */
+      }
+    }
     setSesion(null);
     setMotivoCierre(motivo);
   }, []);
@@ -71,10 +85,18 @@ export function SesionProvider({ children, reloj = relojSistema }) {
     return () => clearTimeout(t);
   }, [sesion, cerrarSesion, reloj]);
 
-  // Cerrar sesión en una pestaña la cierra en las demás
+  // Cerrar sesión en una pestaña la cierra en las demás (el evento "storage" solo llega a las OTRAS pestañas)
   useEffect(() => {
     const alCambiar = (e) => {
-      if (e.key === CLAVE && !e.newValue) cerrarSesion(null);
+      if (e.key !== CLAVE_CIERRE || !e.newValue) return;
+      let aviso = null;
+      try {
+        aviso = JSON.parse(e.newValue);
+      } catch {
+        return;
+      }
+      const actual = sesionRef.current;
+      if (actual && aviso?.idUsuario === actual.usuario.idUsuario) cerrarSesion(MENSAJE_OTRA_PESTANA);
     };
     window.addEventListener('storage', alCambiar);
     return () => window.removeEventListener('storage', alCambiar);
